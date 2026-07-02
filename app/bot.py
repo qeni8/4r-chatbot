@@ -1,8 +1,12 @@
 import json
+import re
 
 from app import limits, llm, retrieval, router, waste_lookup
 from app.config import settings
 from app.db import get_conn
+
+# Atık adıyla "alıyor musunuz / kabul" niyeti → tablo eşleşmesini modele kaynak olarak ver.
+KABUL_INTENT = re.compile(r"al[ıi]yor|al[ıi]r\s*m|kabul|at[ıi]ğ[ıi]", re.IGNORECASE)
 
 DEVIR = ("Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. "
          "İletişim: +90 282 652 30 90, info@4r.com.tr")
@@ -45,6 +49,10 @@ def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
             return {"answer": cevap, "method": "atik_kodu", "sources": []}
 
     kaynaklar = retrieval.search(mesaj)
+    if KABUL_INTENT.search(mesaj):
+        tablo = waste_lookup.name_context(mesaj)
+        if tablo:
+            kaynaklar = [tablo, *kaynaklar]
     basliklar = list(dict.fromkeys(k["baslik"] for k in kaynaklar))
     try:
         cevap = llm.answer(mesaj, kaynaklar, _gecmis(oturum_id))

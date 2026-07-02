@@ -46,6 +46,40 @@ def by_name(term: str, limit: int = 8) -> list[dict]:
     ]
 
 
+_ISIM_STOP = set(
+    "atık atığı atığını atıklar alıyor alır alıp kabul ediyor musunuz var hizmet gönder".split()
+)
+
+
+def name_context(mesaj: str, limit: int = 6) -> dict | None:
+    """Atık adıyla tabloda eşleşen kodları RAG kaynağı olarak döndürür (modele grounding)."""
+    kelimeler = [w for w in re.findall(r"\w+", mesaj.lower()) if len(w) > 3 and w not in _ISIM_STOP]
+    if not kelimeler:
+        return None
+    kosul = " or ".join(["tanim ilike %s"] * len(kelimeler))
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"select kod, tanim, merkez, luleburgaz, kapakli from atik_kodlari where {kosul} limit 40",
+            [f"%{w}%" for w in kelimeler],
+        ).fetchall()
+    if not rows:
+        return None
+
+    def skor(tanim: str) -> int:
+        return sum(1 for w in kelimeler if w in tanim.lower())
+
+    rows = sorted(rows, key=lambda r: skor(r[1]), reverse=True)[:limit]
+    satir = []
+    for kod, tanim, m, l, k in rows:
+        tes = [ad for f, (_, ad) in zip((m, l, k), TESISLER) if f] or ["hiçbir tesiste kabul edilmiyor"]
+        satir.append(f"- {kod} — {tanim} — kabul: {', '.join(tes)}")
+    return {
+        "baslik": "Atık kodu tablosu (isimle eşleşen kodlar)",
+        "kaynak": "atik_kodlari",
+        "icerik": "İsimle eşleşen atık kodları ve kabul edildiği tesisler:\n" + "\n".join(satir),
+    }
+
+
 def answer(text: str) -> str:
     """Atık kodu sorusuna deterministik (modelsiz) Türkçe cevap."""
     d = _digits(text)

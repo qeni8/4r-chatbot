@@ -17,6 +17,7 @@ from app.bot import reply
 from app.db import get_conn, pool
 
 DEVIR = "kesin bilgi veremiyorum"
+YOGUNLUK = "yoğunluktan yanıt veremedim"  # Groq limit fallback'i — kalite hatası değil
 SET = Path("tests/test_set.json")
 
 
@@ -25,6 +26,8 @@ def degerlendir(item: dict, cevap: str) -> str:
     anahtar = item.get("anahtar", [])
     exp = item["expect"]
 
+    if YOGUNLUK in dusuk:
+        return "LIMIT"  # sağlayıcı hız limiti; bot mantığından bağımsız
     if exp == "review":
         return "REVIEW"
     if exp == "devir":
@@ -54,7 +57,7 @@ def main() -> None:
         verdikt = degerlendir(item, r["answer"])
         sonuclar.append((verdikt, item, r))
         if r["method"] in ("rag", "rag_hata"):
-            time.sleep(2)  # Groq ücretsiz limitine saygı
+            time.sleep(4)  # Groq ücretsiz limitine saygı (ani yükte 429'u azaltır)
     pool.close()
 
     ozet = Counter(v for v, _, _ in sonuclar)
@@ -64,7 +67,7 @@ def main() -> None:
 
     print("=" * 80)
     for v, item, r in sonuclar:
-        isaret = {"PASS": "✓", "FAIL": "✗", "REVIEW": "?"}[v]
+        isaret = {"PASS": "✓", "FAIL": "✗", "REVIEW": "?", "LIMIT": "~"}[v]
         print(f"{isaret} [{v:6}] {item['kategori']:14} | {item['soru']}")
         print(f"        ({r['method']}) {r['answer'][:150].replace(chr(10), ' ')}")
     print("=" * 80)

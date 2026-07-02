@@ -37,6 +37,8 @@ PATHS = [
     "/hizmetlerimiz/",
     "/iletisim/",
     "/50-kg-alti-atik-gonderimi-kilavuzu/",
+    # NOT: /magaza/ ürünleri JS ile yükleniyor; basit çekme yalnızca menü/çerez getiriyor.
+    # Fiyatlar için ürün yapısı ayrıca incelenmeli ya da manuel fiyat listesi eklenmeli.
 ]
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 4R-Bot/1.0"
