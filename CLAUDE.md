@@ -148,9 +148,11 @@ fiyat söyleyebilir); 50 kg üstü "teklif al" akışına yönlendirilir.
 - [x] **Adım 4 — Test seti**: 40 soru + otomatik değerlendirici. Temiz run: 30 PASS, 0 gerçek FAIL.
 - **Groq limit bulgusu + çözüm:** ücretsiz 70B = 100k token/gün. Tavanda otomatik
   `llama-3.1-8b-instant`'a düşer (yine ücretsiz) → bot hiç düşmez. Retry TPM'de, fallback TPD'de.
-- **Kalan kalite işleri:** isimle atık arama 2. faz (semantik), KVKK gizlilik metni,
-  site otomatik tazeleme, mağaza fiyatları (JS/manuel), test setini SSS ile büyütme.
-- **Kalan yayın işleri:** VPS + widget script + Meta WhatsApp + domain/HTTPS.
+- [x] **İsimle atık arama 2. faz (semantik):** atik_kodlari.embedding + hibrit name_context.
+  "boya çamuru" → doğru boya kodları; yazım hatasına dayanıklı.
+- [x] **KVKK gizlilik notu** widget'ta. [x] **Tazeleme scripti** (scripts/refresh.py).
+- **Kalan (senden veri):** mağaza fiyatları (JS/manuel liste), test setini gerçek SSS ile büyütme.
+- **Kalan yayın işleri:** VPS + widget script + Meta WhatsApp kurulumu + domain/HTTPS + refresh cron.
 - [x] **Adım 3 — Bot beyni** çalışıyor: yönlendirici (`router.py`) + yapısal cevap (`waste_lookup.py`) +
   hibrit RAG (`retrieval.py`) + model cevabı (`llm.py`, Gemini/Anthropic) + `/chat` orkestrasyon + loglama.
   Canlı test: grounding doğru (5900 firma, solvent listesi, adres), bilmediğinde uydurmadan yetkiliye devir,
