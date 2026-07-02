@@ -1,0 +1,16 @@
+.env
+.env.local
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+data/raw/
+*.xlsx
+!data/samples/*.xlsx
+.DS_Store
