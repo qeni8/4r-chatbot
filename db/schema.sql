@@ -11,9 +11,11 @@ create table if not exists atik_kodlari (
     luleburgaz  boolean not null default false,
     kapakli     boolean not null default false,
     bolum       text,                         -- 2 haneli üst başlık bağlamı
-    grup        text                          -- 4 haneli üst başlık bağlamı
+    grup        text,                         -- 4 haneli üst başlık bağlamı
+    embedding   vector(768)                   -- tanım vektörü (isimle semantik arama)
 );
 create index if not exists idx_atik_kod_temiz on atik_kodlari (kod_temiz);
+create index if not exists idx_atik_embedding on atik_kodlari using hnsw (embedding vector_cosine_ops);
 
 -- RAG: belge kaynakları + parçalar
 create table if not exists documents (

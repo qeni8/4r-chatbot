@@ -51,24 +51,49 @@ _ISIM_STOP = set(
 )
 
 
-def name_context(mesaj: str, limit: int = 6) -> dict | None:
-    """Atık adıyla tabloda eşleşen kodları RAG kaynağı olarak döndürür (modele grounding)."""
+def name_context(mesaj: str, limit: int = 6, havuz: int = 20) -> dict | None:
+    """Atık adıyla eşleşen kodları RAG kaynağı olarak döndürür (semantik + kelime, RRF)."""
+    from pgvector import Vector
+    from pgvector.psycopg import register_vector
+
+    from app.embeddings import embed_query
+
     kelimeler = [w for w in re.findall(r"\w+", mesaj.lower()) if len(w) > 3 and w not in _ISIM_STOP]
-    if not kelimeler:
+    vec = Vector(embed_query(mesaj))
+    with get_conn() as conn:
+        register_vector(conn)
+        sem = [
+            r[0]
+            for r in conn.execute(
+                "select id from atik_kodlari where embedding is not null "
+                "order by embedding <=> %s limit %s",
+                (vec, havuz),
+            ).fetchall()
+        ]
+        lex = []
+        if kelimeler:
+            kosul = " or ".join(["tanim ilike %s"] * len(kelimeler))
+            lex = [
+                r[0]
+                for r in conn.execute(
+                    f"select id from atik_kodlari where {kosul} limit %s",
+                    [f"%{w}%" for w in kelimeler] + [havuz],
+                ).fetchall()
+            ]
+
+    skor: dict[int, float] = {}
+    for liste in (sem, lex):
+        for rank, cid in enumerate(liste):
+            skor[cid] = skor.get(cid, 0.0) + 1.0 / (60 + rank)
+    top = sorted(skor, key=lambda c: skor[c], reverse=True)[:limit]
+    if not top:
         return None
-    kosul = " or ".join(["tanim ilike %s"] * len(kelimeler))
+
     with get_conn() as conn:
         rows = conn.execute(
-            f"select kod, tanim, merkez, luleburgaz, kapakli from atik_kodlari where {kosul} limit 40",
-            [f"%{w}%" for w in kelimeler],
+            "select kod, tanim, merkez, luleburgaz, kapakli from atik_kodlari where id = any(%s)",
+            (top,),
         ).fetchall()
-    if not rows:
-        return None
-
-    def skor(tanim: str) -> int:
-        return sum(1 for w in kelimeler if w in tanim.lower())
-
-    rows = sorted(rows, key=lambda r: skor(r[1]), reverse=True)[:limit]
     satir = []
     for kod, tanim, m, l, k in rows:
         tes = [ad for f, (_, ad) in zip((m, l, k), TESISLER) if f] or ["hiçbir tesiste kabul edilmiyor"]
