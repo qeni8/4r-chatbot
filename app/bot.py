@@ -20,6 +20,18 @@ def _log(kanal: str, oturum_id: str | None, soru: str, cevap: str,
         conn.commit()
 
 
+def _gecmis(oturum_id: str | None, n: int = 3) -> list[tuple[str, str]]:
+    if not oturum_id:
+        return []
+    with get_conn() as conn:
+        rows = conn.execute(
+            "select soru, cevap from konusma_loglari where oturum_id = %s and yontem <> 'limit' "
+            "and created_at > now() - interval '2 hours' order by id desc limit %s",
+            (oturum_id, n),
+        ).fetchall()
+    return [(s, c) for s, c in reversed(rows)]
+
+
 def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
     izin, uyari = limits.check(oturum_id)
     if not izin:
@@ -35,7 +47,7 @@ def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
     kaynaklar = retrieval.search(mesaj)
     basliklar = list(dict.fromkeys(k["baslik"] for k in kaynaklar))
     try:
-        cevap = llm.answer(mesaj, kaynaklar)
+        cevap = llm.answer(mesaj, kaynaklar, _gecmis(oturum_id))
     except Exception:  # noqa: BLE001 — model/ağ sınırı; güvenli tarafa al
         _log(kanal, oturum_id, mesaj, DEVIR, "rag_hata", basliklar, settings.llm_provider)
         return {"answer": DEVIR, "method": "rag_hata", "sources": basliklar}

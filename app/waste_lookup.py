@@ -55,12 +55,14 @@ def answer(text: str) -> str:
         if not r:
             return (f"Bu atık kodunu ({d}) listemizde bulamadım. Kodu kontrol edebilir "
                     f"ya da yetkilimize danışabilirsiniz: {ILETISIM}")
-        th = " (Tehlikeli atık sınıfında.)" if r["tehlikeli"] else ""
+        th = " Tehlikeli atık sınıfındadır." if r["tehlikeli"] else ""
+        bilgi = f"{r['kod']} — {r['tanim']}."
         if r["tesisler"]:
             yer = " ve ".join(r["tesisler"])
-            return (f"Evet ✅ {r['kod']} kodlu atığı **{yer}** tesisimizde alıyoruz.{th} "
+            sonek = "tesislerimizde" if len(r["tesisler"]) > 1 else "tesisimizde"
+            return (f"{bilgi}\n\nEvet ✅ bu atığı **{yer}** {sonek} alıyoruz.{th} "
                     f"Göndermek isterseniz süreci anlatabilirim.")
-        return (f"{r['kod']} kodlu atığı şu an hiçbir tesisimizde kabul edemiyoruz.{th} "
+        return (f"{bilgi}\n\nBu atığı şu an hiçbir tesisimizde kabul edemiyoruz.{th} "
                 f"Dilerseniz sizi yetkilimize aktarayım: {ILETISIM}")
 
     if len(d) in (2, 4):

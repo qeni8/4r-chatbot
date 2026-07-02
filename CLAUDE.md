@@ -150,8 +150,12 @@ fiyat söyleyebilir); 50 kg üstü "teklif al" akışına yönlendirilir.
   ani 5/60sn. Sınır aşımı modele gitmeden nazik mesajla durur. Test edildi.
 - **Maliyet tavanı:** Google tarafında $10/ay bütçe uyarısı (kurulacak). Asıl sert tavan
   uygulama içi günlük 200 limit (maks ~$5/ay senaryosu).
-- **Barındırma:** şu an lokal (dev). Yayın için küçük VPS (TR/EU), ~$5-10/ay — widget/WhatsApp aşamasında.
-- **Açık iş:** isimle atık arama (kademeli, sonra semantik), test seti (Adım 4), web widget (Adım 6), WhatsApp (Adım 7).
+- [x] **Adım 6 — Web widget**: `web/widget.js` (gömülebilir), `/widget.js` + `/demo`, CORS. Tarayıcıda canlı test edildi.
+- [x] **Adım 7 — WhatsApp**: `whatsapp.py` + webhook (verify/POST), ortak `bot.py`. Lokal test edildi.
+  Canlı için Meta token + genel webhook URL (yayın) gerekir.
+- **Barındırma:** şu an lokal (dev). Yayın için küçük VPS (TR/EU), ~$5-10/ay — EN SON.
+- **Yayın öncesi açık iş:** test seti (Adım 4), isimle atık arama (Bölüm 13).
+- **Yayın (en son):** VPS deploy + widget script URL + Meta WhatsApp kurulumu + Google ücretli plan & $10 tavan.
 
 ## 12. Çözülecek Tutarsızlık (önemli not)
 Sitede iki farklı istatistik var: anasayfa "+5900 firma / 92.000 ton" derken, hakkımızda
