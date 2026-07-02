@@ -1,14 +1,12 @@
-import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import BackgroundTasks, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
-from app import limits, llm, retrieval, router, waste_lookup
-from app.config import settings
+from app import bot, whatsapp
 from app.db import get_conn, pool
 
 WEB = Path(__file__).resolve().parent.parent / "web"
@@ -62,39 +60,29 @@ class ChatResponse(BaseModel):
     sources: list[str] = []
 
 
-def _log(req: ChatRequest, cevap: str, yontem: str, kaynaklar: list[str], model: str) -> None:
-    with get_conn() as conn:
-        conn.execute(
-            "insert into konusma_loglari (kanal, oturum_id, soru, cevap, yontem, kaynaklar, model) "
-            "values (%s, %s, %s, %s, %s, %s, %s)",
-            (req.channel, req.session_id, req.message, cevap, yontem,
-             json.dumps(kaynaklar, ensure_ascii=False), model),
-        )
-        conn.commit()
-
-
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
-    izin, uyari = limits.check(req.session_id)
-    if not izin:
-        _log(req, uyari, "limit", [], "-")
-        return ChatResponse(answer=uyari, method="limit")
+    r = bot.reply(req.message, req.session_id, req.channel)
+    return ChatResponse(answer=r["answer"], method=r["method"], sources=r["sources"])
 
-    if router.route(req.message) == "atik_kodu":
-        cevap = waste_lookup.answer(req.message)
-        if cevap:
-            _log(req, cevap, "atik_kodu", [], "-")
-            return ChatResponse(answer=cevap, method="atik_kodu")
 
-    kaynaklar = retrieval.search(req.message)
-    basliklar = list(dict.fromkeys(k["baslik"] for k in kaynaklar))
-    try:
-        cevap = llm.answer(req.message, kaynaklar)
-    except Exception:  # noqa: BLE001 — model/ağ sınırı; kullanıcıyı güvenli tarafa al
-        cevap = ("Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. "
-                 "İletişim: +90 282 652 30 90, info@4r.com.tr")
-        _log(req, cevap, "rag_hata", basliklar, settings.llm_provider)
-        return ChatResponse(answer=cevap, method="rag_hata", sources=basliklar)
+def _handle_wa(phone: str, text: str) -> None:
+    r = bot.reply(text, whatsapp.session_id(phone), "whatsapp")
+    whatsapp.send(phone, r["answer"])
 
-    _log(req, cevap, "rag", basliklar, settings.llm_provider)
-    return ChatResponse(answer=cevap, method="rag", sources=basliklar)
+
+@app.get("/webhook/whatsapp")
+def wa_verify(request: Request) -> Response:
+    p = request.query_params
+    ch = whatsapp.verify(p.get("hub.mode"), p.get("hub.verify_token"), p.get("hub.challenge"))
+    if ch is None:
+        return Response(status_code=403)
+    return Response(content=ch, media_type="text/plain")
+
+
+@app.post("/webhook/whatsapp")
+async def wa_incoming(request: Request, bg: BackgroundTasks) -> dict:
+    payload = await request.json()
+    for msg in whatsapp.parse(payload):
+        bg.add_task(_handle_wa, msg["from"], msg["text"])
+    return {"status": "ok"}
