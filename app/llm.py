@@ -52,6 +52,35 @@ def _gemini(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> 
     return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
 
 
+def _groq(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> str:
+    mesajlar = [{"role": "system", "content": SISTEM}]
+    for q, a in gecmis:
+        mesajlar.append({"role": "user", "content": q})
+        mesajlar.append({"role": "assistant", "content": a})
+    mesajlar.append({"role": "user", "content": _user_prompt(soru, kaynaklar)})
+    body = {
+        "model": settings.groq_model,
+        "messages": mesajlar,
+        "max_tokens": 500,
+        "temperature": 0.2,
+    }
+    for deneme, bekle in enumerate((0, 3, 8)):
+        if bekle:
+            time.sleep(bekle)
+        r = httpx.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {settings.groq_api_key}"},
+            json=body,
+            timeout=60,
+        )
+        if r.status_code == 429 and deneme < 2:
+            continue
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"].strip()
+    r.raise_for_status()
+    return r.json()["choices"][0]["message"]["content"].strip()
+
+
 def _anthropic(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> str:
     import anthropic
 
@@ -71,4 +100,6 @@ def answer(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]] | Non
     gecmis = gecmis or []
     if settings.llm_provider == "anthropic":
         return _anthropic(soru, kaynaklar, gecmis)
-    return _gemini(soru, kaynaklar, gecmis)
+    if settings.llm_provider == "gemini":
+        return _gemini(soru, kaynaklar, gecmis)
+    return _groq(soru, kaynaklar, gecmis)

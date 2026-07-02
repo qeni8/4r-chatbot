@@ -6,7 +6,10 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://4r:4r_dev_pw@localhost:5432/4r_chatbot"
 
-    llm_provider: str = "gemini"  # "gemini" | "anthropic"
+    llm_provider: str = "groq"  # "groq" | "gemini" | "anthropic"
+
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
 
     anthropic_api_key: str = ""
     llm_model_default: str = "claude-haiku-4-5-20251001"

@@ -141,7 +141,10 @@ fiyat söyleyebilir); 50 kg üstü "teklif al" akışına yönlendirilir.
   (e5-large denendi → fastembed/onnxruntime harici-veri hatası; mpnet'e geçildi.)
 - **Retrieval kararı:** tek başına anlamsal arama Türkçe'de zayıf kaldı → hibrit (vektör + `to_tsvector('turkish')`)
   RRF ile birleştirildi. Varsayılan k=5.
-- **LLM kararı:** önce Gemini Flash (ücretsiz), tatmin olunmazsa Anthropic'e geçiş (`LLM_PROVIDER` ile). Sağlayıcıdan bağımsız kuruldu.
+- **LLM kararı (güncel):** **Groq + Llama 3.3 70B — tamamen ücretsiz.** Sağlayıcı-bağımsız
+  (`LLM_PROVIDER`: groq | gemini | anthropic). Groq ücretsiz katman bu hacme fazlasıyla yeter;
+  gerekirse ücretli Gemini/Anthropic'e tek satır geçiş. Maliyet: LLM $0 + embedding $0.
+- **Barındırma kararı:** küçük VPS (~$5/ay, TR/EU) — güvenilirlik için. En son kurulacak.
 - [x] **Adım 3 — Bot beyni** çalışıyor: yönlendirici (`router.py`) + yapısal cevap (`waste_lookup.py`) +
   hibrit RAG (`retrieval.py`) + model cevabı (`llm.py`, Gemini/Anthropic) + `/chat` orkestrasyon + loglama.
   Canlı test: grounding doğru (5900 firma, solvent listesi, adres), bilmediğinde uydurmadan yetkiliye devir,
