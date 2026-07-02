@@ -9,6 +9,7 @@
   var RENK = "#1b7a43";
   var KARSILAMA = "Merhaba! 4R Çevre destek asistanıyım. Atık kodu, hizmetler veya " +
     "gönderim hakkında sorabilirsiniz.";
+  var KVKK_URL = "https://4r.com.tr/kisisel-verilerin-korunmasi-aydinlatma-metni/";
 
   function sid() {
     var k = "r4_sid", v = localStorage.getItem(k);
@@ -45,7 +46,9 @@
     "#r4-form{display:flex;border-top:1px solid #e6e8eb}" +
     "#r4-in{flex:1;border:none;padding:13px;font-size:14px;outline:none}" +
     "#r4-send{border:none;background:" + RENK + ";color:#fff;padding:0 18px;cursor:pointer;font-size:15px}" +
-    ".r4-typing{color:#7a7f87;font-style:italic}";
+    ".r4-typing{color:#7a7f87;font-style:italic}" +
+    ".r4-foot{font-size:11px;color:#8a8f97;text-align:center;padding:6px 10px;border-top:1px solid #eef0f2}" +
+    ".r4-foot a{color:#6a6f77}";
 
   var st = document.createElement("style");
   st.textContent = css;
@@ -62,7 +65,9 @@
     '<div id="r4-head">4R Çevre Destek<small>Genelde birkaç saniyede yanıtlar</small></div>' +
     '<div id="r4-msgs"></div>' +
     '<form id="r4-form"><input id="r4-in" placeholder="Mesajınızı yazın..." autocomplete="off">' +
-    '<button id="r4-send" type="submit" aria-label="Gönder">&#10148;</button></form>';
+    '<button id="r4-send" type="submit" aria-label="Gönder">&#10148;</button></form>' +
+    '<div class="r4-foot">Mesajlarınız hizmet kalitesi için kaydedilir. ' +
+    '<a href="' + KVKK_URL + '" target="_blank" rel="noopener">Gizlilik</a></div>';
 
   document.body.appendChild(btn);
   document.body.appendChild(panel);
