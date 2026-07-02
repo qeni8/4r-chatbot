@@ -52,18 +52,9 @@ def _gemini(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> 
     return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
 
 
-def _groq(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> str:
-    mesajlar = [{"role": "system", "content": SISTEM}]
-    for q, a in gecmis:
-        mesajlar.append({"role": "user", "content": q})
-        mesajlar.append({"role": "assistant", "content": a})
-    mesajlar.append({"role": "user", "content": _user_prompt(soru, kaynaklar)})
-    body = {
-        "model": settings.groq_model,
-        "messages": mesajlar,
-        "max_tokens": 500,
-        "temperature": 0.2,
-    }
+def _groq_call(model: str, mesajlar: list[dict]) -> httpx.Response:
+    body = {"model": model, "messages": mesajlar, "max_tokens": 500, "temperature": 0.2}
+    r = None
     for deneme, bekle in enumerate((0, 3, 8)):
         if bekle:
             time.sleep(bekle)
@@ -73,10 +64,25 @@ def _groq(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> st
             json=body,
             timeout=60,
         )
-        if r.status_code == 429 and deneme < 2:
-            continue
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"].strip()
+        if r.status_code == 429:
+            if "per day" in r.text.lower():
+                return r  # günlük limit: beklemenin faydası yok, yedek modele düş
+            if deneme < 2:
+                continue
+        return r
+    return r
+
+
+def _groq(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> str:
+    mesajlar = [{"role": "system", "content": SISTEM}]
+    for q, a in gecmis:
+        mesajlar.append({"role": "user", "content": q})
+        mesajlar.append({"role": "assistant", "content": a})
+    mesajlar.append({"role": "user", "content": _user_prompt(soru, kaynaklar)})
+
+    r = _groq_call(settings.groq_model, mesajlar)
+    if r.status_code == 429:  # birincil model limitte → yedek modele düş (yine ücretsiz)
+        r = _groq_call(settings.groq_model_fallback, mesajlar)
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"].strip()
 

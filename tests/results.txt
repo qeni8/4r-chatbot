@@ -41,97 +41,88 @@ Bu atığı şu an hiçbir tesisimizde kabul edemiyoruz. Dilerseniz sizi yetkili
 • 01 05 99 — Başka bir şekilde tanımlanmamış atıklar
 Hangisini soruyorsunuz?
 
-[REVIEW] plastik atığı alıyor musunuz
-  -> Evet, plastik atığı alıyoruz. Plastik atıklar için farklı atık kodlarımız mevcut. Örneğin, 02 01 04 (Atık plastikler, ambalajlar hariç), 07 02 13 (Atık plastik), 12 01 05 (Plastik yongalar ve çapaklar), 15 01 02 (Plastik ambalaj), 16 01 19 (Plastik) ve 17 02 03 (Plastik) kodlarına sahip plastik atıkları kabul ediyoruz. Bu atıkları Lüleburgaz ve Kapaklı tesislerimizde kabul ediyoruz.
-
-[REVIEW] boya çamuru atığını kabul ediyor musunuz
-  -> Evet, boya çamuru atığını kabul ediyoruz. Atık kodu 04 01 09 - Perdah ve boyama atıkları veya 04 02 16* - Tehlikeli maddeler içeren boya maddeleri ve pigmentler veya 04 02 17 - 04 02 16 dışındaki boya maddeleri ve pigmentler olabilir. Kabul edilen tesislerimiz: Merkez, Lüleburgaz ve bazı durumlarda Kapaklı'dır.
-
-[PASS] lisanslı vidanjör hizmetiniz var mı
-  -> Evet, lisanslı vidanjör hizmeti sunuyoruz. Çevre, Şehircilik ve İklim Değişikliği Bakanlığı’ndan lisanslı vidanjör araçlarımızla, atık su ve sıvı atıkların toplanması ve güvenli şekilde bertaraf edilmesini sağlıyoruz. Detaylı bilgi için bizi arayabilirsiniz: +90 282 652 30 90, info@4r.com.tr
-
-[PASS] solvent geri kazanımı yapıyor musunuz
-  -> Evet, solvent geri kazanımı yapıyoruz. Lisanslı solvent geri kazanım tesisi olarak, modern distilasyon sistemleri ve çevre mevzuatına uygun olarak çalışıyoruz. Geri kazanılan solventler, orijinal solvent kalitesine çok yakın saflıkta yeniden kullanılabilir. Hizmetimize dahil olan başlıca solventler arasında Tiner, Aseton, Toluol, Metanol, Butanol, Etil Asetat, İzopropil Alkol, Ksilen ve M.E.K. (Metil Etil Keton) bulunur.
-
-[PASS] atık su arıtma hizmetiniz nasıl çalışıyor
-  -> Atık su arıtma hizmetimiz, suyun kaynağına ve kirlilik yüküne göre özelleştirilen bir süreçtir. Hizmetimiz aşağıdaki adımlardan oluşur:
-
-1. **Ön Arıtma**: Katı atıkların tutulduğu, büyük partiküllerin ve yağların uzaklaştırıldığı ilk aşamadır. İzgaralar, kum tutucular ve yağ tutucular bu aşamada kullanılır.
-2. **Fiziksel Arıtma**: Askıda katı maddelerin çökeltilmesi ve sudan ayrılması sağlanır. Çökeltme havuzları ve filtrasyon sistemleri bu süreçte görev alır.
-3. **Biyolojik Arıtma**: (Detayları kaynakta bulunmamaktadır.)
-
-Tesisimizde uygulanan atık su arıtma sistemleri, suyun kaynağına ve kirlilik yüküne göre özelleştirilir. Bu sayede su kaynaklarının korunması, toplum sağlığının güvence altına alınması, endüstriyel suyun yeniden kullanımı ve yasal yükümlülüklerin yerine getirilmesi sağlanır.
-
-Bu konuda daha detaylı bilgi için bizi arayabilirsiniz: +90 282 652 30 90 veya info@4r.com.tr adresine e-posta gönderebilirsiniz.
-
-[PASS] atıktan türetilmiş yakıt üretiyor musunuz
-  -> Evet, atıktan türetilmiş yakıt (ATY) üretiyoruz. Lisanslı tesisimizde çeşitli atık türlerinden yüksek kalorifik değere sahip ATY üretimi gerçekleştiriyoruz. Bu sayede hem atıkları bertaraf ediyor hem de endüstriyel yakıt ihtiyacına katkı sağlıyoruz. 
-Aşağıdaki formu doldurarak anında teklif alabilirsiniz veya bizimle iletişime geçebilirsiniz: +90 282 652 30 90, info@4r.com.tr.
-
-[PASS] elektronik atık işliyor musunuz
-  -> Evet, elektronik atık işliyoruz. Lisanslı tesisimizde elektrikli ve elektronik atıkları (e-atıkları) mevzuata uygun şekilde işliyor, değerli bileşenlerini geri kazanırken zararlı maddelerin çevreye yayılmasını önlüyoruz.
-
-[PASS] akümülatör depolaması yapıyor musunuz
-  -> Evet, akümülatör geçici depolama hizmeti sunuyoruz. Lisanslı tesisimizde akümülatörleri güvenli bir şekilde depoluyoruz. Detaylı bilgi için bizi arayabilirsiniz: +90 282 652 30 90 veya info@4r.com.tr adresine e-posta gönderebilirsiniz.
-
-[PASS] ibc tank yıkama hizmetiniz var mı
-  -> Evet, IBC tank yıkama hizmetimiz vardır. IBC tanklar içerisinde taşınan maddelere göre özel temizlik yöntemleri kullanılarak yıkanır, dezenfekte edilir ve tekrar kullanıma hazır hale getirilir. Tehlikeli kimyasallara özel yıkama protokolleri, koku, kalıntı ve kir giderimi, çevreye zarar vermeyen atık su arıtımı gibi hizmetleri sunuyoruz. Detaylı bilgi için bizimle iletişime geçebilirsiniz.
-
-[REVIEW] tehlikeli atık taşıma yapıyor musunuz
+[LIMIT] plastik atığı alıyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] ara depolama hizmetiniz nedir
+[LIMIT] boya çamuru atığını kabul ediyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] entegre atık yönetimi ne demek
+[LIMIT] lisanslı vidanjör hizmetiniz var mı
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] adresiniz nedir
+[LIMIT] solvent geri kazanımı yapıyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[PASS] telefon numaranız nedir
-  -> Telefon numaramız +90 282 652 30 90'dir.
-
-[PASS] e-posta adresiniz nedir
+[LIMIT] atık su arıtma hizmetiniz nasıl çalışıyor
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[PASS] kaç firmaya hizmet veriyorsunuz
+[LIMIT] atıktan türetilmiş yakıt üretiyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] hangi şehirlerde tesisiniz var
+[LIMIT] elektronik atık işliyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] ne zaman kuruldunuz
+[LIMIT] akümülatör depolaması yapıyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] 50 kg altı atık göndermek kaç para
+[LIMIT] ibc tank yıkama hizmetiniz var mı
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] tehlikeli atık taşıma ücreti ne kadar
+[LIMIT] tehlikeli atık taşıma yapıyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[PASS] nasıl teklif alabilirim
+[LIMIT] ara depolama hizmetiniz nedir
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[FAIL] bugün hava nasıl
+[LIMIT] entegre atık yönetimi ne demek
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[FAIL] en yakın restoran nerede
+[LIMIT] adresiniz nedir
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[FAIL] bitcoin fiyatı ne kadar
+[LIMIT] telefon numaranız nedir
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[FAIL] atık depolamak yasal olarak zorunlu mu, hukuki görüşünüz nedir
+[LIMIT] e-posta adresiniz nedir
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[FAIL] bana bir şaka yap
+[LIMIT] kaç firmaya hizmet veriyorsunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] merhaba
+[LIMIT] hangi şehirlerde tesisiniz var
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] nasıl yardımcı olabilirsiniz
+[LIMIT] ne zaman kuruldunuz
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] 50 kg altı atık göndermek kaç para
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] tehlikeli atık taşıma ücreti ne kadar
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] nasıl teklif alabilirim
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] bugün hava nasıl
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] en yakın restoran nerede
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] bitcoin fiyatı ne kadar
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] atık depolamak yasal olarak zorunlu mu, hukuki görüşünüz nedir
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] bana bir şaka yap
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] merhaba
+  -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
+
+[LIMIT] nasıl yardımcı olabilirsiniz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
 [PASS] 15 01 10 alıyor musunuz
@@ -139,11 +130,11 @@ Aşağıdaki formu doldurarak anında teklif alabilirsiniz veya bizimle iletişi
 
 Evet ✅ bu atığı **Lüleburgaz ve Kapaklı** tesislerimizde alıyoruz. Tehlikeli atık sınıfındadır. Göndermek isterseniz süreci anlatabilirim.
 
-[REVIEW] peki bunu nasıl gönderebilirim
+[LIMIT] peki bunu nasıl gönderebilirim
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] solvent geri kazanıyor musunuz
+[LIMIT] solvent geri kazanıyor musunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr
 
-[REVIEW] hangi solventleri kabul ediyorsunuz
+[LIMIT] hangi solventleri kabul ediyorsunuz
   -> Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. İletişim: +90 282 652 30 90, info@4r.com.tr

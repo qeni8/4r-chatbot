@@ -57,7 +57,7 @@ def main() -> None:
         verdikt = degerlendir(item, r["answer"])
         sonuclar.append((verdikt, item, r))
         if r["method"] in ("rag", "rag_hata"):
-            time.sleep(4)  # Groq ücretsiz limitine saygı (ani yükte 429'u azaltır)
+            time.sleep(9)  # Groq 12k token/dk limiti altında kal (~1500 tok/soru)
     pool.close()
 
     ozet = Counter(v for v, _, _ in sonuclar)

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
+    groq_model_fallback: str = "llama-3.1-8b-instant"  # 70B günlük limitte buna düşer
 
     anthropic_api_key: str = ""
     llm_model_default: str = "claude-haiku-4-5-20251001"
