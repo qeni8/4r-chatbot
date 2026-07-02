@@ -1,12 +1,17 @@
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 from app import limits, llm, retrieval, router, waste_lookup
 from app.config import settings
 from app.db import get_conn, pool
+
+WEB = Path(__file__).resolve().parent.parent / "web"
 
 
 @asynccontextmanager
@@ -17,6 +22,25 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="4R Çevre Chatbot", version="0.1.0", lifespan=lifespan)
+
+# Widget müşteri tarayıcısından çağrılır. Prod'da allow_origins=4r.com.tr'ye daraltılır.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["POST", "GET"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/widget.js")
+def widget_js() -> FileResponse:
+    return FileResponse(WEB / "widget.js", media_type="application/javascript")
+
+
+@app.get("/", response_class=HTMLResponse)
+@app.get("/demo", response_class=HTMLResponse)
+def demo() -> str:
+    return (WEB / "demo.html").read_text(encoding="utf-8")
 
 
 @app.get("/health")

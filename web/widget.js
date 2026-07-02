@@ -1,0 +1,118 @@
+(function () {
+  "use strict";
+
+  var script = document.currentScript;
+  var API = (script && script.dataset.api) ||
+    (script ? new URL(script.src).origin : "") ;
+  var CHAT_URL = API.replace(/\/$/, "") + "/chat";
+
+  var RENK = "#1b7a43";
+  var KARSILAMA = "Merhaba! 4R Çevre destek asistanıyım. Atık kodu, hizmetler veya " +
+    "gönderim hakkında sorabilirsiniz.";
+
+  function sid() {
+    var k = "r4_sid", v = localStorage.getItem(k);
+    if (!v) {
+      v = "web-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem(k, v);
+    }
+    return v;
+  }
+
+  function esc(s) {
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function bicimle(s) {
+    return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
+  }
+
+  var css =
+    "#r4-btn{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;" +
+    "background:" + RENK + ";color:#fff;border:none;cursor:pointer;font-size:26px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:2147483000}" +
+    "#r4-panel{position:fixed;right:20px;bottom:90px;width:360px;max-width:calc(100vw - 40px);height:520px;max-height:calc(100vh - 120px);" +
+    "background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.28);display:none;flex-direction:column;overflow:hidden;z-index:2147483000;font-family:system-ui,Arial,sans-serif}" +
+    "#r4-panel.open{display:flex}" +
+    "#r4-head{background:" + RENK + ";color:#fff;padding:14px 16px;font-weight:600;font-size:15px}" +
+    "#r4-head small{display:block;font-weight:400;opacity:.85;font-size:12px}" +
+    "#r4-msgs{flex:1;overflow-y:auto;padding:14px;background:#f6f7f9}" +
+    ".r4-m{margin:6px 0;padding:10px 13px;border-radius:12px;font-size:14px;line-height:1.5;max-width:85%;white-space:normal;word-wrap:break-word}" +
+    ".r4-bot{background:#fff;border:1px solid #e6e8eb;color:#1a1a1a}" +
+    ".r4-user{background:" + RENK + ";color:#fff;margin-left:auto}" +
+    ".r4-src{font-size:11px;color:#7a7f87;margin:2px 0 8px 4px}" +
+    "#r4-form{display:flex;border-top:1px solid #e6e8eb}" +
+    "#r4-in{flex:1;border:none;padding:13px;font-size:14px;outline:none}" +
+    "#r4-send{border:none;background:" + RENK + ";color:#fff;padding:0 18px;cursor:pointer;font-size:15px}" +
+    ".r4-typing{color:#7a7f87;font-style:italic}";
+
+  var st = document.createElement("style");
+  st.textContent = css;
+  document.head.appendChild(st);
+
+  var btn = document.createElement("button");
+  btn.id = "r4-btn";
+  btn.innerHTML = "&#128172;";
+  btn.setAttribute("aria-label", "Destek sohbeti");
+
+  var panel = document.createElement("div");
+  panel.id = "r4-panel";
+  panel.innerHTML =
+    '<div id="r4-head">4R Çevre Destek<small>Genelde birkaç saniyede yanıtlar</small></div>' +
+    '<div id="r4-msgs"></div>' +
+    '<form id="r4-form"><input id="r4-in" placeholder="Mesajınızı yazın..." autocomplete="off">' +
+    '<button id="r4-send" type="submit" aria-label="Gönder">&#10148;</button></form>';
+
+  document.body.appendChild(btn);
+  document.body.appendChild(panel);
+
+  var msgs = panel.querySelector("#r4-msgs");
+  var form = panel.querySelector("#r4-form");
+  var input = panel.querySelector("#r4-in");
+  var acildi = false;
+
+  function ekle(html, cls) {
+    var d = document.createElement("div");
+    d.className = "r4-m " + cls;
+    d.innerHTML = html;
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
+    return d;
+  }
+
+  btn.onclick = function () {
+    panel.classList.toggle("open");
+    if (!acildi) {
+      acildi = true;
+      ekle(esc(KARSILAMA), "r4-bot");
+    }
+    input.focus();
+  };
+
+  form.onsubmit = function (e) {
+    e.preventDefault();
+    var q = input.value.trim();
+    if (!q) return;
+    ekle(esc(q), "r4-user");
+    input.value = "";
+    var bekle = ekle('<span class="r4-typing">yazıyor...</span>', "r4-bot");
+
+    fetch(CHAT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: q, session_id: sid(), channel: "web" })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        bekle.innerHTML = bicimle(data.answer || "");
+        if (data.sources && data.sources.length) {
+          ekle("Kaynak: " + esc(data.sources.slice(0, 3).join(", ")), "r4-src");
+        }
+        msgs.scrollTop = msgs.scrollHeight;
+      })
+      .catch(function () {
+        bekle.innerHTML = esc("Bağlantı hatası. Lütfen tekrar deneyin.");
+      });
+  };
+})();
