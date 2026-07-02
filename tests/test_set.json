@@ -1,0 +1,49 @@
+[
+  {"soru": "06 01 01 alıyor musunuz", "kategori": "atik_kabul", "expect": "contains", "anahtar": ["Merkez", "Kapaklı", "Tehlikeli"]},
+  {"soru": "01 05 06 kabul ediyor musunuz", "kategori": "atik_kabul", "expect": "contains", "anahtar": ["Lüleburgaz"]},
+  {"soru": "02 01 04 alıyor musunuz", "kategori": "atik_kabul", "expect": "contains", "anahtar": ["Lüleburgaz", "Kapaklı"]},
+  {"soru": "15 01 10 hangi atık ve alıyor musunuz", "kategori": "atik_kabul", "expect": "contains", "anahtar": ["ambalaj", "Kapaklı"]},
+  {"soru": "150110", "kategori": "atik_kabul", "expect": "contains", "anahtar": ["15 01 10"]},
+  {"soru": "20 03 01 alıyor musunuz", "kategori": "atik_red", "expect": "contains", "anahtar": ["kabul edemiyoruz"]},
+  {"soru": "99 99 99 alıyor musunuz", "kategori": "atik_bulunamadi", "expect": "contains", "anahtar": ["bulamadım"]},
+  {"soru": "01 05 grubunda hangi kodlar var", "kategori": "atik_grup", "expect": "contains", "anahtar": ["01 05"]},
+
+  {"soru": "plastik atığı alıyor musunuz", "kategori": "atik_isim", "expect": "review"},
+  {"soru": "boya çamuru atığını kabul ediyor musunuz", "kategori": "atik_isim", "expect": "review"},
+
+  {"soru": "lisanslı vidanjör hizmetiniz var mı", "kategori": "hizmet", "expect": "cevap", "anahtar": ["vidanjör"]},
+  {"soru": "solvent geri kazanımı yapıyor musunuz", "kategori": "hizmet", "expect": "cevap", "anahtar": ["solvent"]},
+  {"soru": "atık su arıtma hizmetiniz nasıl çalışıyor", "kategori": "hizmet", "expect": "cevap", "anahtar": ["arıt"]},
+  {"soru": "atıktan türetilmiş yakıt üretiyor musunuz", "kategori": "hizmet", "expect": "cevap", "anahtar": ["ATY", "yakıt"]},
+  {"soru": "elektronik atık işliyor musunuz", "kategori": "hizmet", "expect": "cevap", "anahtar": ["elektronik"]},
+  {"soru": "akümülatör depolaması yapıyor musunuz", "kategori": "hizmet", "expect": "cevap", "anahtar": ["akümülatör"]},
+  {"soru": "ibc tank yıkama hizmetiniz var mı", "kategori": "hizmet", "expect": "cevap", "anahtar": ["IBC", "tank"]},
+  {"soru": "tehlikeli atık taşıma yapıyor musunuz", "kategori": "hizmet", "expect": "cevap", "anahtar": ["taşı"]},
+  {"soru": "ara depolama hizmetiniz nedir", "kategori": "hizmet", "expect": "cevap", "anahtar": ["depola"]},
+  {"soru": "entegre atık yönetimi ne demek", "kategori": "hizmet", "expect": "cevap", "anahtar": ["atık"]},
+
+  {"soru": "adresiniz nedir", "kategori": "bilgi", "expect": "cevap", "anahtar": ["Kapaklı", "Tekirdağ"]},
+  {"soru": "telefon numaranız nedir", "kategori": "bilgi", "expect": "cevap", "anahtar": ["282", "652"]},
+  {"soru": "e-posta adresiniz nedir", "kategori": "bilgi", "expect": "cevap", "anahtar": ["info@4r"]},
+  {"soru": "kaç firmaya hizmet veriyorsunuz", "kategori": "bilgi", "expect": "cevap", "anahtar": ["5"]},
+  {"soru": "hangi şehirlerde tesisiniz var", "kategori": "bilgi", "expect": "cevap", "anahtar": ["Kapaklı"]},
+  {"soru": "ne zaman kuruldunuz", "kategori": "bilgi", "expect": "cevap", "anahtar": ["2018"]},
+
+  {"soru": "50 kg altı atık göndermek kaç para", "kategori": "fiyat", "expect": "review"},
+  {"soru": "tehlikeli atık taşıma ücreti ne kadar", "kategori": "fiyat", "expect": "review"},
+  {"soru": "nasıl teklif alabilirim", "kategori": "fiyat", "expect": "cevap", "anahtar": ["teklif", "iletişim", "282"]},
+
+  {"soru": "bugün hava nasıl", "kategori": "guardrail", "expect": "devir"},
+  {"soru": "en yakın restoran nerede", "kategori": "guardrail", "expect": "devir"},
+  {"soru": "bitcoin fiyatı ne kadar", "kategori": "guardrail", "expect": "devir"},
+  {"soru": "atık depolamak yasal olarak zorunlu mu, hukuki görüşünüz nedir", "kategori": "mevzuat", "expect": "devir"},
+  {"soru": "bana bir şaka yap", "kategori": "guardrail", "expect": "devir"},
+
+  {"soru": "merhaba", "kategori": "selam", "expect": "review"},
+  {"soru": "nasıl yardımcı olabilirsiniz", "kategori": "selam", "expect": "review"},
+
+  {"soru": "15 01 10 alıyor musunuz", "kategori": "hafiza", "session": "hf1", "expect": "contains", "anahtar": ["15 01 10"]},
+  {"soru": "peki bunu nasıl gönderebilirim", "kategori": "hafiza", "session": "hf1", "expect": "review"},
+  {"soru": "solvent geri kazanıyor musunuz", "kategori": "hafiza", "session": "hf2", "expect": "cevap", "anahtar": ["solvent"]},
+  {"soru": "hangi solventleri kabul ediyorsunuz", "kategori": "hafiza", "session": "hf2", "expect": "review"}
+]
