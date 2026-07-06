@@ -75,6 +75,7 @@
   var msgs = panel.querySelector("#r4-msgs");
   var form = panel.querySelector("#r4-form");
   var input = panel.querySelector("#r4-in");
+  var send = panel.querySelector("#r4-send");
   var acildi = false;
 
   function ekle(html, cls) {
@@ -95,12 +96,23 @@
     input.focus();
   };
 
+  var bekliyor = false;
+
+  function kilit(durum) {
+    bekliyor = durum;
+    input.disabled = durum;
+    send.disabled = durum;
+    send.style.opacity = durum ? "0.5" : "1";
+  }
+
   form.onsubmit = function (e) {
     e.preventDefault();
+    if (bekliyor) return;
     var q = input.value.trim();
     if (!q) return;
     ekle(esc(q), "r4-user");
     input.value = "";
+    kilit(true);
     var bekle = ekle('<span class="r4-typing">yazıyor...</span>', "r4-bot");
 
     fetch(CHAT_URL, {
@@ -114,10 +126,14 @@
         if (data.sources && data.sources.length) {
           ekle("Kaynak: " + esc(data.sources.slice(0, 3).join(", ")), "r4-src");
         }
-        msgs.scrollTop = msgs.scrollHeight;
       })
       .catch(function () {
-        bekle.innerHTML = esc("Bağlantı hatası. Lütfen tekrar deneyin.");
+        bekle.innerHTML = esc("Bağlantı hatası. Lütfen tekrar yazın.");
+      })
+      .then(function () {
+        kilit(false);
+        input.focus();
+        msgs.scrollTop = msgs.scrollHeight;
       });
   };
 })();
