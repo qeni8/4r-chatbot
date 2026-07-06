@@ -54,9 +54,9 @@ def _gemini(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> 
         if r.status_code == 429 and deneme < 2:
             continue
         r.raise_for_status()
-        return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+        return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip(), settings.gemini_model
     r.raise_for_status()
-    return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+    return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip(), settings.gemini_model
 
 
 def _groq_call(model: str, mesajlar: list[dict]) -> httpx.Response:
@@ -88,10 +88,12 @@ def _groq(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> st
     mesajlar.append({"role": "user", "content": _user_prompt(soru, kaynaklar)})
 
     r = _groq_call(settings.groq_model, mesajlar)
+    model = settings.groq_model
     if r.status_code == 429:  # birincil model limitte → yedek modele düş (yine ücretsiz)
         r = _groq_call(settings.groq_model_fallback, mesajlar)
+        model = settings.groq_model_fallback
     r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"].strip()
+    return r.json()["choices"][0]["message"]["content"].strip(), model
 
 
 def _anthropic(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) -> str:
@@ -106,10 +108,13 @@ def _anthropic(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]]) 
     msg = cl.messages.create(
         model=settings.llm_model_default, max_tokens=500, system=SISTEM, messages=mesajlar
     )
-    return msg.content[0].text.strip()
+    return msg.content[0].text.strip(), settings.llm_model_default
 
 
-def answer(soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]] | None = None) -> str:
+def answer(
+    soru: str, kaynaklar: list[dict], gecmis: list[tuple[str, str]] | None = None
+) -> tuple[str, str]:
+    """(cevap, kullanılan_model) döndürür."""
     gecmis = gecmis or []
     if settings.llm_provider == "anthropic":
         return _anthropic(soru, kaynaklar, gecmis)

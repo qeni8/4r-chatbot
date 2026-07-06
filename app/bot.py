@@ -55,10 +55,10 @@ def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
             kaynaklar = [tablo, *kaynaklar]
     basliklar = list(dict.fromkeys(k["baslik"] for k in kaynaklar))
     try:
-        cevap = llm.answer(mesaj, kaynaklar, _gecmis(oturum_id))
+        cevap, model = llm.answer(mesaj, kaynaklar, _gecmis(oturum_id))
     except Exception:  # noqa: BLE001 — model/ağ sınırı; güvenli tarafa al
         _log(kanal, oturum_id, mesaj, DEVIR, "rag_hata", basliklar, settings.llm_provider)
         return {"answer": DEVIR, "method": "rag_hata", "sources": basliklar}
 
-    _log(kanal, oturum_id, mesaj, cevap, "rag", basliklar, settings.llm_provider)
+    _log(kanal, oturum_id, mesaj, cevap, "rag", basliklar, model)
     return {"answer": cevap, "method": "rag", "sources": basliklar}
