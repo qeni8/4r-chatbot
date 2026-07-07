@@ -11,6 +11,9 @@ KABUL_INTENT = re.compile(r"al[ıi]yor|al[ıi]r\s*m|kabul|at[ıi]ğ[ıi]", re.IG
 DEVIR = ("Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. "
          "İletişim: +90 282 652 30 90, info@4r.com.tr")
 
+MAX_INPUT = 1500  # aşırı uzun/kötüye kullanım girdisini kırp (token koruması)
+BOS = "Bir sorunuzu yazabilir misiniz? Atık kodu, hizmet veya gönderim hakkında sorabilirsiniz."
+
 
 def _log(kanal: str, oturum_id: str | None, soru: str, cevap: str,
          yontem: str, kaynaklar: list[str], model: str) -> None:
@@ -37,6 +40,12 @@ def _gecmis(oturum_id: str | None, n: int = 3) -> list[tuple[str, str]]:
 
 
 def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
+    mesaj = (mesaj or "").strip()
+    if not mesaj:
+        return {"answer": BOS, "method": "bos", "sources": []}
+    if len(mesaj) > MAX_INPUT:
+        mesaj = mesaj[:MAX_INPUT]
+
     izin, uyari = limits.check(oturum_id)
     if not izin:
         _log(kanal, oturum_id, mesaj, uyari, "limit", [], "-")
