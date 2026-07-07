@@ -14,6 +14,19 @@ DEVIR = ("Şu an yoğunluktan yanıt veremedim, sizi yetkilimize aktarayım. "
 MAX_INPUT = 1500  # aşırı uzun/kötüye kullanım girdisini kırp (token koruması)
 BOS = "Bir sorunuzu yazabilir misiniz? Atık kodu, hizmet veya gönderim hakkında sorabilirsiniz."
 
+# Sadece selam/teşekkür (gerçek soru içermeyen) → modelsiz, anında yanıt. ^...$ ile tam eşleşme.
+SELAM = re.compile(
+    r"^(merhaba|selam(lar)?|iyi günler|iyi akşamlar|günaydın|kolay gelsin|s\.a)[\s!.]*$",
+    re.IGNORECASE,
+)
+TESEKKUR = re.compile(
+    r"^(teşekkür(ler)?|teşekkür ederim|çok teşekkürler|sağ ?ol(un)?|eyvallah)[\s!.]*$",
+    re.IGNORECASE,
+)
+SELAM_CEVAP = ("Merhaba! Size nasıl yardımcı olabilirim? Atık kodu, hizmetlerimiz veya "
+               "gönderim hakkında sorabilirsiniz.")
+TESEKKUR_CEVAP = "Rica ederim! Başka bir sorunuz olursa buradayım."
+
 
 def _log(kanal: str, oturum_id: str | None, soru: str, cevap: str,
          yontem: str, kaynaklar: list[str], model: str) -> None:
@@ -50,6 +63,11 @@ def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
     if not izin:
         _log(kanal, oturum_id, mesaj, uyari, "limit", [], "-")
         return {"answer": uyari, "method": "limit", "sources": []}
+
+    for kalip, cevap in ((SELAM, SELAM_CEVAP), (TESEKKUR, TESEKKUR_CEVAP)):
+        if kalip.match(mesaj):
+            _log(kanal, oturum_id, mesaj, cevap, "selam", [], "-")
+            return {"answer": cevap, "method": "selam", "sources": []}
 
     if router.route(mesaj) == "atik_kodu":
         cevap = waste_lookup.answer(mesaj)
