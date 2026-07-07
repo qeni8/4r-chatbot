@@ -1,13 +1,10 @@
 import re
 
 from app.db import get_conn
+from app.router import CODE4, CODE6
 
 TESISLER = [("merkez", "Merkez"), ("luleburgaz", "Lüleburgaz"), ("kapakli", "Kapaklı")]
 ILETISIM = "+90 282 652 30 90 / info@4r.com.tr"
-
-
-def _digits(s: str) -> str:
-    return re.sub(r"[^0-9]", "", s or "")
 
 
 def by_code(kod_temiz: str) -> dict | None:
@@ -105,33 +102,60 @@ def name_context(mesaj: str, limit: int = 6, havuz: int = 20) -> dict | None:
     }
 
 
+def _answer_code(kod_temiz: str) -> str:
+    r = by_code(kod_temiz)
+    if not r:
+        return (f"Bu atık kodunu ({kod_temiz}) listemizde bulamadım. Kodu kontrol edebilir "
+                f"ya da yetkilimize danışabilirsiniz: {ILETISIM}")
+    th = " Tehlikeli atık sınıfındadır." if r["tehlikeli"] else ""
+    bilgi = f"{r['kod']} — {r['tanim']}."
+    if r["tesisler"]:
+        yer = " ve ".join(r["tesisler"])
+        sonek = "tesislerimizde" if len(r["tesisler"]) > 1 else "tesisimizde"
+        return (f"{bilgi}\n\nEvet ✅ bu atığı **{yer}** {sonek} alıyoruz.{th} "
+                f"Göndermek isterseniz süreci anlatabilirim.")
+    return (f"{bilgi}\n\nBu atığı şu an hiçbir tesisimizde kabul edemiyoruz.{th} "
+            f"Dilerseniz sizi yetkilimize aktarayım: {ILETISIM}")
+
+
+def _answer_group(prefix: str) -> str:
+    kodlar = by_group(prefix)
+    if not kodlar:
+        return ""
+    if len(kodlar) > 8:
+        return (f"{prefix} grubunda {len(kodlar)} atık kodu var. Hangi atıktan bahsettiğinizi "
+                f"yazarsanız net cevap verebilirim.")
+    satir = "\n".join(f"• {x['kod']} — {x['tanim']}" for x in kodlar)
+    return f"{prefix} grubundaki kodlar:\n{satir}\nHangisini soruyorsunuz?"
+
+
+def _kodlar6(text: str) -> list[str]:
+    out, seen = [], set()
+    for m in CODE6.findall(text):
+        k = "".join(m)
+        if k not in seen:
+            seen.add(k)
+            out.append(k)
+    return out
+
+
+def _gruplar4(text: str) -> list[str]:
+    out, seen = [], set()
+    for m in CODE4.findall(text):
+        k = "".join(m)
+        if k not in seen and 1 <= int(k[:2]) <= 20:  # geçerli atık bölümü 01-20 (telefon vb. eler)
+            seen.add(k)
+            out.append(k)
+    return out
+
+
 def answer(text: str) -> str:
-    """Atık kodu sorusuna deterministik (modelsiz) Türkçe cevap."""
-    d = _digits(text)
-
-    if len(d) == 6:
-        r = by_code(d)
-        if not r:
-            return (f"Bu atık kodunu ({d}) listemizde bulamadım. Kodu kontrol edebilir "
-                    f"ya da yetkilimize danışabilirsiniz: {ILETISIM}")
-        th = " Tehlikeli atık sınıfındadır." if r["tehlikeli"] else ""
-        bilgi = f"{r['kod']} — {r['tanim']}."
-        if r["tesisler"]:
-            yer = " ve ".join(r["tesisler"])
-            sonek = "tesislerimizde" if len(r["tesisler"]) > 1 else "tesisimizde"
-            return (f"{bilgi}\n\nEvet ✅ bu atığı **{yer}** {sonek} alıyoruz.{th} "
-                    f"Göndermek isterseniz süreci anlatabilirim.")
-        return (f"{bilgi}\n\nBu atığı şu an hiçbir tesisimizde kabul edemiyoruz.{th} "
-                f"Dilerseniz sizi yetkilimize aktarayım: {ILETISIM}")
-
-    if len(d) in (2, 4):
-        kodlar = by_group(d)
-        if not kodlar:
-            return f"{d} grubunda kayıtlı kod bulamadım. Yetkilimize danışabilirsiniz: {ILETISIM}"
-        if len(kodlar) > 8:
-            return (f"{d} grubunda {len(kodlar)} atık kodu var. Hangi atıktan bahsettiğinizi "
-                    f"yazarsanız net cevap verebilirim.")
-        satir = "\n".join(f"• {x['kod']} — {x['tanim']}" for x in kodlar)
-        return f"{d} grubundaki kodlar:\n{satir}\nHangisini soruyorsunuz?"
-
-    return ""  # kod değil → çağıran katman RAG'e yönlendirir
+    """Atık kodu sorusuna deterministik (modelsiz) cevap; çoklu kod ve gürültü toleranslı."""
+    kodlar = _kodlar6(text)
+    if kodlar:
+        return "\n\n".join(_answer_code(k) for k in kodlar[:3])
+    for grup in _gruplar4(text):
+        cevap = _answer_group(grup)
+        if cevap:
+            return cevap
+    return ""  # kod yok → çağıran katman RAG'e (isimle arama) yönlendirir
