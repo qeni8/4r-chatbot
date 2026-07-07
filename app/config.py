@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = ""
     whatsapp_access_token: str = ""
     whatsapp_phone_number_id: str = ""
+    whatsapp_app_secret: str = ""  # gelen webhook imza (X-Hub-Signature-256) doğrulaması
 
     app_env: str = "dev"
     log_level: str = "info"

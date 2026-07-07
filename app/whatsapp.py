@@ -5,6 +5,7 @@ KVKK: log için telefon numarası ham değil, hash'lenmiş oturum kimliği kulla
 """
 
 import hashlib
+import hmac
 import re
 
 import httpx
@@ -18,6 +19,17 @@ def verify(mode: str | None, token: str | None, challenge: str | None) -> str | 
     if mode == "subscribe" and token and token == settings.whatsapp_verify_token:
         return challenge
     return None
+
+
+def verify_signature(raw: bytes, signature: str | None) -> bool:
+    """Gelen webhook'un Meta'dan geldiğini X-Hub-Signature-256 ile doğrular."""
+    secret = settings.whatsapp_app_secret
+    if not secret:
+        return True  # dev: app secret ayarlı değilse doğrulama atlanır
+    if not signature or not signature.startswith("sha256="):
+        return False
+    beklenen = "sha256=" + hmac.new(secret.encode(), raw, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(beklenen, signature)
 
 
 def session_id(phone: str) -> str:

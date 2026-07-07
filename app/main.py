@@ -1,3 +1,4 @@
+import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -81,8 +82,10 @@ def wa_verify(request: Request) -> Response:
 
 
 @app.post("/webhook/whatsapp")
-async def wa_incoming(request: Request, bg: BackgroundTasks) -> dict:
-    payload = await request.json()
-    for msg in whatsapp.parse(payload):
+async def wa_incoming(request: Request, bg: BackgroundTasks) -> Response:
+    raw = await request.body()
+    if not whatsapp.verify_signature(raw, request.headers.get("x-hub-signature-256")):
+        return Response(status_code=403)
+    for msg in whatsapp.parse(json.loads(raw)):
         bg.add_task(_handle_wa, msg["from"], msg["text"])
-    return {"status": "ok"}
+    return Response(content='{"status":"ok"}', media_type="application/json")
