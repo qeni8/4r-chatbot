@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 from app import bot, whatsapp
+from app.config import settings
 from app.db import get_conn, pool
 
 WEB = Path(__file__).resolve().parent.parent / "web"
@@ -22,10 +23,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="4R Çevre Chatbot", version="0.1.0", lifespan=lifespan)
 
-# Widget müşteri tarayıcısından çağrılır. Prod'da allow_origins=4r.com.tr'ye daraltılır.
+# Widget müşteri tarayıcısından çağrılır. Origin listesi env'den (prod'da 4r.com.tr'ye daralt).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     app_env: str = "dev"
     log_level: str = "info"
+    cors_origins: str = "*"  # prod: "https://4r.com.tr,https://www.4r.com.tr" (virgülle)
 
     # Anti-spam / maliyet koruması
     daily_limit: int = 200          # tüm bot, günlük toplam mesaj
