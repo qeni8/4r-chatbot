@@ -1,6 +1,7 @@
-"""İçerik havuzunu baştan tazeler: site çek → parçala → embed.
+"""Site içeriğini tazeler (çek + temizle → data/site/*.md).
 
-Site içeriği değiştiğinde çalıştırılır (yayında zamanlı görev olarak da kurulabilir).
+Parçalama/embedding adımı yok: korpus küçük olduğu için tamamı doğrudan modele veriliyor
+(bkz. app/knowledge.py). Site içeriği değiştiğinde çalıştırılır.
 
 Kullanım:
     python scripts/refresh.py
@@ -10,19 +11,11 @@ import os
 import subprocess
 import sys
 
-ADIMLAR = [
-    ("Site çekiliyor", "scripts/fetch_site.py"),
-    ("Parçalanıyor", "scripts/chunk_site.py"),
-    ("Embed ediliyor", "scripts/embed_chunks.py"),
-]
-
 
 def main() -> None:
     env = {**os.environ, "PYTHONPATH": "."}
-    for baslik, script in ADIMLAR:
-        print(f"\n=== {baslik} ({script}) ===")
-        subprocess.run([sys.executable, script], check=True, env=env)
-    print("\nTazeleme tamam.")
+    subprocess.run([sys.executable, "scripts/fetch_site.py"], check=True, env=env)
+    print("\nTazeleme tamam. Uygulamayı yeniden başlatın (içerik açılışta belleğe alınır).")
 
 
 if __name__ == "__main__":

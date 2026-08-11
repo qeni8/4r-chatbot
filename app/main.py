@@ -1,4 +1,5 @@
 import json
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -7,21 +8,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
-from app import bot, whatsapp
+from app import bot, knowledge, whatsapp
 from app.config import settings
-from app.db import get_conn, pool
+from app.db import get_conn, init_db
 
 WEB = Path(__file__).resolve().parent.parent / "web"
+log = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    pool.open()
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level.upper(), logging.INFO),
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+    init_db()
+    log.info("Bilgi havuzu yüklendi: %d belge", knowledge.yukle())
     yield
-    pool.close()
 
 
-app = FastAPI(title="4R Çevre Chatbot", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="4R Çevre Chatbot", version="0.2.0", lifespan=lifespan)
 
 # Widget müşteri tarayıcısından çağrılır. Origin listesi env'den (prod'da 4r.com.tr'ye daralt).
 app.add_middleware(
@@ -46,8 +52,8 @@ def demo() -> str:
 @app.get("/health")
 def health() -> dict:
     with get_conn() as conn:
-        conn.execute("select 1")
-    return {"status": "ok"}
+        kod_sayisi = conn.execute("select count(*) from atik_kodlari").fetchone()[0]
+    return {"status": "ok", "atik_kodu": kod_sayisi, "belge": knowledge.yukle()}
 
 
 class ChatRequest(BaseModel):

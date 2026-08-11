@@ -48,6 +48,31 @@ def slug(path: str) -> str:
     return path.strip("/").replace("/", "_") or "anasayfa"
 
 
+# Çerez/onay banner'ı bazı sayfalarda gövdenin tamamını kaplıyor (iletisim, lisanslar).
+# Temizlenmezse RAG havuzuna çöp girer ve bot bu sayfalara "bilgi var" sanır.
+COP_SATIR = re.compile(
+    r"teknik depolama veya erişim|çerez|abone veya kullanıcı tarafından|"
+    r"yalnızca istatistiksel amaçlar|pazarlama profilleri oluşturmak",
+    re.IGNORECASE,
+)
+MIN_KELIME = 25
+
+
+def temizle(text: str) -> str:
+    """Çerez banner'ı satırlarını ve tekrar eden slider artıklarını atar."""
+    goruldu: set[str] = set()
+    satirlar = []
+    for ham in text.splitlines():
+        s = ham.strip()
+        if not s or COP_SATIR.search(s):
+            continue
+        if s in goruldu:  # anasayfa slider'ı aynı cümleyi 3 kez veriyor
+            continue
+        goruldu.add(s)
+        satirlar.append(s)
+    return "\n".join(satirlar)
+
+
 def fetch_one(client: httpx.Client, path: str) -> tuple[str, int, str]:
     url = BASE + path
     try:
@@ -65,6 +90,10 @@ def fetch_one(client: httpx.Client, path: str) -> tuple[str, int, str]:
     )
     if not text:
         return url, 0, "BOŞ (içerik çıkarılamadı)"
+
+    text = temizle(text)
+    if len(text.split()) < MIN_KELIME:
+        return url, 0, "ATLANDI (temizlik sonrası içerik kalmadı)"
 
     title = trafilatura.extract_metadata(r.text)
     baslik = getattr(title, "title", None) or path

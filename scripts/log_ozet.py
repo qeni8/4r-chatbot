@@ -1,4 +1,4 @@
-"""Konuşma loglarını özetler (Adım 8 — izle & iyileştir).
+"""Konuşma loglarını özetler (izle & iyileştir).
 
 Ne soruluyor, ne kadar insana devrediliyor, hangi sorular cevapsız kalıyor?
 Cevapsız kalan sorular = havuza eklenecek içerik / iyileştirme fırsatı.
@@ -9,56 +9,60 @@ Kullanım:
 
 import sys
 
-from app.db import get_conn, pool
+from app.db import get_conn
+from app.sabitler import DEVIR
 
-DEVIR = "kesin bilgi veremiyorum"
+DEVIR_IZ = DEVIR[:35]
 
 
 def main() -> None:
     gun = int(sys.argv[1]) if len(sys.argv) > 1 else 30
-    pool.open()
+    aralik = "created_at > datetime('now', ?)"
+    param = (f"-{gun} days",)
+
     with get_conn() as conn:
-        aralik = f"created_at > now() - interval '{gun} days'"
-        toplam = conn.execute(f"select count(*) from konusma_loglari where {aralik}").fetchone()[0]
+        toplam = conn.execute(
+            f"select count(*) from konusma_loglari where {aralik}", param
+        ).fetchone()[0]
         if not toplam:
             print(f"Son {gun} günde log yok.")
-            pool.close()
             return
 
         print(f"=== Son {gun} gün — {toplam} mesaj ===\n")
 
-        print("Kanal:")
-        for k, n in conn.execute(
-            f"select kanal, count(*) from konusma_loglari where {aralik} group by kanal order by 2 desc"
-        ).fetchall():
-            print(f"  {k or '-':10} {n}")
+        for baslik, sutun, genislik in (
+            ("Kanal", "kanal", 10), ("Yöntem", "yontem", 10), ("Kullanılan model", "model", 28)
+        ):
+            print(f"{baslik}:")
+            for ad, n in conn.execute(
+                f"select {sutun}, count(*) from konusma_loglari where {aralik} "
+                f"group by {sutun} order by 2 desc",
+                param,
+            ).fetchall():
+                print(f"  {ad or '-':{genislik}} {n}")
+            print()
 
-        print("\nYöntem:")
-        for y, n in conn.execute(
-            f"select yontem, count(*) from konusma_loglari where {aralik} group by yontem order by 2 desc"
-        ).fetchall():
-            print(f"  {y or '-':10} {n}")
-
-        print("\nKullanılan model:")
-        for m, n in conn.execute(
-            f"select model, count(*) from konusma_loglari where {aralik} group by model order by 2 desc"
-        ).fetchall():
-            print(f"  {m or '-':28} {n}")
+        hata = conn.execute(
+            f"select count(*) from konusma_loglari where {aralik} "
+            f"and yontem in ('hata','yogunluk')", param
+        ).fetchone()[0]
+        if hata:
+            print(f"⚠️  Model çağrısı başarısız: {hata} (%{100 * hata // toplam}) — "
+                  f"kota/anahtar kontrol edin.\n")
 
         devir = conn.execute(
-            f"select count(*) from konusma_loglari where {aralik} and cevap ilike %s",
-            (f"%{DEVIR}%",),
+            f"select count(*) from konusma_loglari where {aralik} and cevap like ?",
+            (*param, f"%{DEVIR_IZ}%"),
         ).fetchone()[0]
-        print(f"\nİnsana devir / cevapsız: {devir} (%{100 * devir // toplam})")
+        print(f"İnsana devir / cevapsız: {devir} (%{100 * devir // toplam})")
 
         print("\nCevapsız kalan son sorular (havuz iyileştirme için):")
         for (soru,) in conn.execute(
-            f"select soru from konusma_loglari where {aralik} and cevap ilike %s "
+            f"select soru from konusma_loglari where {aralik} and cevap like ? "
             "order by id desc limit 15",
-            (f"%{DEVIR}%",),
+            (*param, f"%{DEVIR_IZ}%"),
         ).fetchall():
             print(f"  • {soru}")
-    pool.close()
 
 
 if __name__ == "__main__":

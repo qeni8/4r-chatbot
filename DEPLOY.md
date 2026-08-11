@@ -1,99 +1,139 @@
 # Yayına Alma — Windows Ofis PC Kılavuzu
 
 > Bu dosya, ofis Windows bilgisayarında **Claude Code**'un adım adım uygulaması için yazıldı.
-> Hedef: botu bu PC'de çalıştırıp Cloudflare Tunnel ile `https://` adres alıp 4r.com.tr'ye gömmek.
-> Kullanıcı non-tekniktir: her adımı açıkla, hata çıkarsa dur ve çöz, baştan savma.
+> Kullanıcı non-tekniktir: her adımı sade dille açıkla, hata çıkarsa dur ve çöz, atlama.
+>
+> **Docker / WSL2 / BIOS ayarı GEREKMİYOR.** Veritabanı tek dosyalık SQLite, embedding modeli yok.
+> Gereken tek şey Python.
 
-## 0. Önkoşullar (Claude bunları kurar/doğrular)
-Windows'ta yoksa `winget` ile kur:
+## 0. Önkoşullar
+
 ```powershell
-winget install -e --id Docker.DockerDesktop
 winget install -e --id Python.Python.3.12
+winget install -e --id Git.Git
 winget install -e --id Cloudflare.cloudflared
 ```
-- Docker Desktop kurulduktan sonra **açılmalı ve çalışır durumda** olmalı (WSL2 gerekebilir;
-  BIOS'ta sanallaştırma kapalıysa Docker açılmaz → kullanıcıya BIOS'tan "Virtualization" açtır).
-- Doğrula: `docker info`, `python --version` (>=3.11), `cloudflared --version`.
 
-## 1. Repo (zaten klonlanmadıysa)
+Doğrula: `python --version` (>=3.11), `git --version`, `cloudflared --version`.
+PowerShell'i kurulumdan sonra **kapatıp yeniden aç** (PATH güncellensin).
+
+## 1. Repo
+
 ```powershell
 git clone https://github.com/qeni8/4r-chatbot.git
 cd 4r-chatbot
 ```
 
-## 2. Ortam değişkenleri (.env)
-```powershell
-copy .env.example .env
-```
-`.env` içinde şunları ayarla:
-- `GROQ_API_KEY=gsk_...` — kullanıcıdan al (Mac'teki .env'de mevcut; yoksa console.groq.com'dan).
-- `CORS_ORIGINS=https://4r.com.tr,https://www.4r.com.tr` — widget yalnızca siteden çağrılsın.
-- Diğerleri varsayılan kalır (DATABASE_URL localhost'u gösterir, doğru).
+## 2. Python ortamı
 
-## 3. Veritabanı (Docker)
-```powershell
-docker compose up -d
-```
-pgvector'lü Postgres kalkar, `db/schema.sql` otomatik yüklenir. `docker ps` ile "healthy" doğrula.
-
-## 4. Python ortamı
 ```powershell
 python -m venv .venv
 .venv\Scripts\python -m pip install -U pip
 .venv\Scripts\pip install -e ".[ingest,dev]"
 ```
 
-## 5. Veriyi yükle (ilk kurulumda bir kez)
+## 3. Ortam değişkenleri
+
+```powershell
+copy .env.example .env
+notepad .env
+```
+
+Doldurulacaklar:
+- `GEMINI_API_KEY=...` — kullanıcıdan al.
+  **Faturalandırma açık olmalı** (aistudio.google.com → Get API key → Set up Billing).
+  Ücretsiz katmanın günlük kotası yoğun günde biter ve bot "yoğunluk" mesajına düşer.
+  Bu hacimde gerçek maliyet ~$2-5/ay; Google Cloud'da $10 bütçe uyarısı kurulu.
+- `CORS_ORIGINS=https://4r.com.tr,https://www.4r.com.tr` — widget yalnızca siteden çağrılsın.
+- `APP_ENV=prod`
+- Diğerleri varsayılan kalır.
+
+## 4. Atık kodu verisini yükle (ilk kurulumda bir kez)
+
 ```powershell
 $env:PYTHONPATH="."
 .venv\Scripts\python scripts\ingest_atik_kodlari.py data\raw\GUNCEL_ATIK_KODLARI_4R.xlsx
-.venv\Scripts\python scripts\embed_atik_kodlari.py      # 842 tanım (ilk kez model ~500MB-1GB iner)
-.venv\Scripts\python scripts\refresh.py                 # site: çek→parçala→embed
 ```
 
-## 6. Testler (yayından önce doğrulama)
-```powershell
-.venv\Scripts\python -m pytest -q                       # 33 test yeşil olmalı
+Beklenen çıktı — **birebir bu rakamlar olmalı**:
 ```
-Canlı bir soru dene:
-```powershell
-.venv\Scripts\python -c "from app.db import pool; from app.bot import reply; pool.open(); print(reply('06 01 01 aliyor musunuz','t','web')['answer']); pool.close()"
+Ayrıştırılan 6-haneli kod: 842 | tehlikeli: 408 | en az bir tesiste kabul: 375
+Yüklendi: 842 kayıt → atik_kodlari
 ```
 
-## 7. Uygulamayı çalıştır (açık kalacak)
+## 5. Testler (yayından önce zorunlu doğrulama)
+
+```powershell
+.venv\Scripts\python -m pytest -q
+```
+Tamamı geçmeli. Geçmiyorsa **yayına alma**, önce hatayı çöz.
+
+Kalite ölçümü (Gemini'yi gerçekten çağırır, ~1 dk):
+```powershell
+.venv\Scripts\python scripts\run_tests.py
+```
+Sonuçta **HATA sayısı 0 olmalı**. 0 değilse API anahtarı/kota sorunludur ve ölçüm geçersizdir.
+
+## 6. Uygulamayı çalıştır
+
 ```powershell
 .venv\Scripts\python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
-Bu terminal **açık kalmalı** (bugünlük). Kalıcı servis (NSSM/Task Scheduler) + PC uyku kapatma
-= yayından sonra yapılacak sağlamlaştırma.
+Bu terminal açık kalmalı. Kontrol: tarayıcıda `http://localhost:8000/health`
+→ `{"status":"ok","atik_kodu":842,"belge":17}`
 
-## 8. Cloudflare Tunnel → HTTPS adres
-Yeni bir terminalde:
+## 7. Cloudflare Tunnel → herkese açık HTTPS adres
+
+Yeni bir PowerShell penceresinde:
 ```powershell
 cloudflared tunnel --url http://localhost:8000
 ```
-Çıktıdaki `https://xxxx.trycloudflare.com` adresini **not al** (widget bunu kullanacak).
-> Bugün için hızlı tünel yeterli. Kalıcı `bot.4r.com.tr` alt alan adı + isimli tünel sonra kurulur.
+Çıktıdaki `https://xxxx.trycloudflare.com` adresini **not al**.
 
-## 9. Test: tünel adresi çalışıyor mu
-Tarayıcıda `https://xxxx.trycloudflare.com/demo` aç → widget'ı dene. `06 01 01` doğru cevap
-vermeli. Sonra `.../health` → `{"status":"ok"}`.
+Test: `https://xxxx.trycloudflare.com/demo` → widget'ı dene.
 
-## 10. WordPress'e widget'ı ekle
-4r.com.tr WordPress yöneticisinde, `</body>` öncesine tek satır (tema footer ya da "WPCode" /
-"Insert Headers and Footers" eklentisiyle):
+## 8. WordPress'e widget'ı ekle
+
+4r.com.tr yönetim panelinde `</body>` öncesine (tema footer ya da "WPCode" /
+"Insert Headers and Footers" eklentisi):
+
 ```html
 <script src="https://xxxx.trycloudflare.com/widget.js"></script>
 ```
-> Not: hızlı tünel adresi PC/tünel yeniden başlayınca **değişir**. Kalıcı alt alan adı kurulunca
-> (bot.4r.com.tr) bu satır bir daha değişmez. Bugün launch için hızlı tünel kabul; ardından sabitle.
 
-## 11. Canlı doğrulama
-4r.com.tr'yi aç → sağ altta balon → "vidanjör hizmetiniz var mı", "06 01 01", "boya çamuru"
-sorularını dene. Cevaplar doğru + KVKK notu görünür olmalı.
+> ⚠️ Hızlı tünel adresi PC/tünel yeniden başlayınca **değişir** ve widget ölür.
+> Bugün launch için kabul; hemen ardından Bölüm 10'daki kalıcı tünelle sabitlenmeli.
+
+## 9. Canlı doğrulama
+
+4r.com.tr'yi aç → sağ altta balon → sırayla dene:
+1. `06 01 01 alıyor musunuz` → Merkez ve Kapaklı, tehlikeli (modelsiz, anında)
+2. `boya çamuru alıyor musunuz` → 08 01 1x kodları
+3. `vidanjör hizmetiniz var mı` → site içeriğinden cevap
+4. `bugün hava nasıl` → kibarca reddetmeli
+
+Panel altında KVKK notu görünür olmalı.
 
 ---
-## Yayından sonra (sağlamlaştırma — deadline değil)
-- Kalıcı tünel + `bot.4r.com.tr` (adres sabitlenir, script bir daha değişmez)
-- Uygulamayı Windows servisi yap (NSSM) + PC uyku/otomatik başlat ayarı
-- Groq ücretli/limit kararı, WhatsApp (Meta Cloud API), mağaza fiyatları
+
+## 10. Yayından sonra — sağlamlaştırma (aynı gün yapılmalı)
+
+1. **Kalıcı tünel + alt alan adı** (`bot.4r.com.tr`) — adres bir daha değişmez,
+   WordPress'teki script satırı sabitlenir. `cloudflared tunnel login` → `tunnel create` →
+   DNS kaydı → `tunnel run`.
+2. **Windows servisi** (NSSM ya da Görev Zamanlayıcı) — PC yeniden başlayınca bot kendiliğinden
+   ayağa kalksın, terminal açık kalmak zorunda olmasın.
+3. **Güç ayarları** — PC uyku moduna girmesin (Denetim Masası → Güç Seçenekleri → Uyku: Asla).
+4. **Yedek** — `data\4r_chatbot.db` tek dosya; günlük kopyası alınsın (konuşma logları burada).
+5. **İzleme** — haftada bir: `.venv\Scripts\python scripts\log_ozet.py 7`
+   (cevapsız kalan sorular = havuza eklenecek içerik).
+
+## Sorun giderme
+
+| Belirti | Sebep / çözüm |
+|---|---|
+| `/health` açılmıyor | uvicorn terminali kapanmış; Bölüm 6'yı tekrar çalıştır |
+| Widget cevap vermiyor | Tünel adresi değişmiş → Bölüm 8'deki script satırını güncelle |
+| Cevaplar "yoğunluk" diyor | Gemini kotası doldu → faturalandırma açık mı kontrol et |
+| `ModuleNotFoundError` | `.venv\Scripts\pip install -e ".[ingest,dev]"` tekrar çalıştır |
+| Widget siteye eklendi ama açılmıyor | `CORS_ORIGINS` 4r.com.tr'yi içeriyor mu, `.env` kaydedildi mi |

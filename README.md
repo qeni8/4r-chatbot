@@ -1,70 +1,66 @@
 # 4R Çevre Chatbot
 
-RAG + yapısal atık kodu sorgusu yapan destek chatbot'u (web widget + WhatsApp).
-Uydurmaz; bilmediğinde insana devreder. Mimari ve kararlar: [`CLAUDE.md`](./CLAUDE.md).
+Atık yönetimi destek botu (web widget + WhatsApp). Uydurmaz; bilmediğinde insana devreder.
+Mimari kararlar: [`CLAUDE.md`](./CLAUDE.md) · Yayın: [`DEPLOY.md`](./DEPLOY.md) ·
+Bekleyen veriler: [`EKSIKLER.md`](./EKSIKLER.md)
 
-**Maliyet:** LLM (Groq/Llama) ve embedding (yerel model) ücretsiz — sunucu hariç $0.
+**Bağımlılık yok denecek kadar az:** Python + SQLite. Docker, Postgres, vektör veritabanı
+ve embedding modeli **kullanılmaz** — korpus küçük olduğu için tamamı doğrudan modele verilir.
 
-## Geliştirme kurulumu
+## Kurulum
 
 ```bash
-# 1. Veritabanı (pgvector'lü Postgres, şema otomatik yüklenir)
-docker compose up -d
-
-# 2. Python ortamı
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[ingest,dev]"
 
-# 3. Ortam değişkenleri
-cp .env.example .env        # GROQ_API_KEY doldur (RAG cevapları için gerekli)
+cp .env.example .env            # GEMINI_API_KEY doldur (faturalandırma açık olmalı)
 
-# 4. Veri yükle (ilk kurulumda bir kez)
-python scripts/ingest_atik_kodlari.py data/raw/GUNCEL_ATIK_KODLARI_4R.xlsx
-python scripts/embed_atik_kodlari.py    # 842 tanımı vektörle (isimle arama)
-python scripts/refresh.py               # site: çek → parçala → embed
-
-# 5. API
+PYTHONPATH=. python scripts/ingest_atik_kodlari.py data/raw/GUNCEL_ATIK_KODLARI_4R.xlsx
 uvicorn app.main:app --reload
 ```
 
-Sağlık: `curl localhost:8000/health` → `{"status":"ok"}` · Demo: `localhost:8000/demo`
-
-> Not: scriptler `app` paketini import eder. Editable kurulum (`pip install -e .`)
-> yapılmadıysa başına `PYTHONPATH=.` ekleyin.
+Sağlık: `curl localhost:8000/health` → `{"status":"ok","atik_kodu":842,"belge":17}`
+Demo: `localhost:8000/demo`
 
 ## Nasıl çalışır
 
 ```
-Mesaj → limit kontrolü → yönlendirme
-         ├─ atık kodu (06 01 01 / grup) → tablodan deterministik cevap (modelsiz)
-         └─ serbest soru → hibrit arama (vektör+FTS) → Groq LLM (grounding)
-                            isimle atık niyeti varsa tablo eşleşmesi de kaynağa eklenir
-Bilmiyorsa / limit / hata → insana devir. Her mesaj loglanır.
+Mesaj → limit kontrolü → selam kısayolu → yönlendirme
+  ├─ saf atık kodu sorusu ("06 01 01 alıyor musunuz")
+  │     → SQLite tablodan deterministik cevap, modele hiç uğramaz
+  ├─ kod + başka soru ("06 01 01 fiyatı ne kadar")
+  │     → tablo sonucu modele KAYNAK olarak verilir, model tam soruyu cevaplar
+  └─ serbest soru
+        → tüm site içeriği (17 belge) + varsa isimle eşleşen kodlar → LLM
+
+Bilmiyorsa / konu dışıysa / hata → insana devir. Her mesaj loglanır.
 ```
 
-- **LLM:** Groq Llama 3.3 70B; günlük limitte otomatik `llama-3.1-8b-instant`'a düşer (`app/llm.py`).
-- **Embedding:** yerel `paraphrase-multilingual-mpnet-base-v2` (768), API'siz (`app/embeddings.py`).
-- **Guardrail/limit:** `app/limits.py` (günlük/oturum/ani), grounding sistem promptu `app/llm.py`.
+- **Neden vektör arama yok:** korpus 17 belge / ~5.000 kelime. Tamamı tek istekte modele
+  sığıyor; parçalama ve benzerlik araması yalnızca ıskalama riski ve kurulum yükü ekliyordu.
+- **Atık kodu asla modele yorumlatılmaz** — kabul/red bilgisi tablodan gelir (`app/waste_lookup.py`).
+  İsimle aramada birden çok aday varsa bot seçmez, **sorar**.
+- **LLM:** Gemini (`LLM_PROVIDER=gemini`). Kaliteden memnun kalınmazsa tek satırla Anthropic'e
+  geçiş: `LLM_PROVIDER=anthropic` + `pip install -e ".[anthropic]"`.
 
 ## Yapı
 
 | Yol | İçerik |
 |---|---|
-| `app/` | `main.py` (API), `bot.py` (orkestrasyon), `router.py`, `waste_lookup.py`, `retrieval.py`, `llm.py`, `limits.py`, `whatsapp.py`, `embeddings.py`, `config.py`, `db.py` |
-| `scripts/` | `ingest_atik_kodlari.py`, `fetch_site.py`, `chunk_site.py`, `embed_*.py`, `refresh.py`, `run_tests.py`, `log_ozet.py` |
-| `tests/` | pytest (`test_router`, `test_waste_lookup`, `test_bot`) + `test_set.json` |
-| `web/` | `widget.js` (gömülebilir), `demo.html` |
-| `db/schema.sql` | atık kodu + döküman/chunk + log tabloları (pgvector) |
+| `app/` | `main.py` (API) · `bot.py` (orkestrasyon) · `router.py` · `waste_lookup.py` · `knowledge.py` · `llm.py` · `limits.py` · `whatsapp.py` · `db.py` · `config.py` · `sabitler.py` |
+| `scripts/` | `ingest_atik_kodlari.py` · `fetch_site.py` · `refresh.py` · `run_tests.py` · `log_ozet.py` |
+| `data/site/` | Site içeriği (bot bilgisinin kaynağı, düz Markdown) |
+| `db/schema.sql` | SQLite şeması: `atik_kodlari` + `konusma_loglari` |
+| `web/` | `widget.js` (gömülebilir) · `demo.html` |
 
 ## Test & izleme
 
 ```bash
-pytest -q                       # regresyon (router + atık kodu + girdi)
-python scripts/run_tests.py     # 40 soruluk kalite seti (Groq çağırır)
+pytest -q                       # hermetik regresyon (DB/model gerektirmez)
+python scripts/run_tests.py     # 40 soruluk kalite seti — HATA sayısı 0 olmalı
 python scripts/log_ozet.py 7    # son 7 gün: hacim, devir oranı, cevapsız sorular
-python scripts/refresh.py       # site içeriği değiştiğinde havuzu tazele
+python scripts/refresh.py       # site içeriği değiştiğinde tazele
 ```
 
-## Durum
-`CLAUDE.md` Bölüm 14. Çekirdek + iki kanal + testler tamam. Kalan: yayın (VPS + Meta WhatsApp),
-LLM ücretli/seçim kararı, mağaza fiyatları.
+> `scripts/` dosyaları `app` paketini import eder. Editable kurulum yapılmadıysa
+> komutların başına `PYTHONPATH=.` ekleyin.

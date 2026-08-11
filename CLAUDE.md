@@ -129,6 +129,22 @@ fiyat söyleyebilir); 50 kg üstü "teklif al" akışına yönlendirilir.
 - **Köprü:** "Alıyoruz" sonrası müşteri "nasıl gönderirim / fiyat" sorar →
   50 kg altı mağaza fiyatı, 50 kg üstü "teklif al". Site içeriğine bağlı (Adım 2).
 
+## 15. Mimari Sadeleştirme (güncel — önceki kararların yerini alır)
+Korpusun küçüklüğü (17 belge / ~5.000 kelime) ölçüldükten sonra vektör yığını kaldırıldı:
+- **RAG → tam bağlam.** Site içeriğinin tamamı her istekte modele verilir (`app/knowledge.py`).
+  Parçalama, embedding ve benzerlik araması yok → retrieval ıskalaması diye bir hata sınıfı yok.
+- **Postgres+pgvector → SQLite.** Tek dosya, sunucu kurulumu yok. Docker/WSL2/BIOS zinciri
+  kalktı; Windows kurulumu "Python kur + pip install + çalıştır"a indi.
+- **Silinenler:** `embeddings.py`, `retrieval.py`, `chunk_site.py`, `embed_*.py`,
+  `docker-compose.yml`, `fastembed`/`psycopg`/`pgvector` bağımlılıkları.
+- **LLM:** Gemini (faturalandırma açık — ücretsiz katman yoğun günde çöküyor, Groq'ta yaşandı).
+  `LLM_PROVIDER=anthropic` ile tek satır geçiş korunur.
+- **Düzeltilen gerçek hatalar:** (1) tarih `01.05.2024` sahte atık koduna dönüyordu;
+  (2) "kod + fiyat/süreç" sorusunda sorunun geri kalanı yutuluyordu; (3) her LLM hatası
+  sessizce "yoğunluk" mesajına çevrilip testte muaf tutuluyordu — kalite hiç ölçülmemişti;
+  (4) prod'da boş `WHATSAPP_APP_SECRET` webhook'u herkese açık bırakıyordu.
+- **Bekleyen veriler:** `EKSIKLER.md` (mağaza fiyatları, lisanslar, SSS, "Merkez" tesisi).
+
 ## 14. İlerleme
 - [x] **Adım 1 — Atık kodu tablosu** tamam: 842 kod Postgres'e yüklendi, yapısal sorgu
   test edildi (format toleransı, tehlikeli/tesis bilgisi, olmayan kodda "yetkiliye devir").

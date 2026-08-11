@@ -4,24 +4,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql://4r:4r_dev_pw@localhost:5432/4r_chatbot"
+    db_path: str = "data/4r_chatbot.db"
 
-    llm_provider: str = "groq"  # "groq" | "gemini" | "anthropic"
-
-    groq_api_key: str = ""
-    groq_model: str = "llama-3.3-70b-versatile"
-    groq_model_fallback: str = "llama-3.1-8b-instant"  # 70B günlük limitte buna düşer
-
-    anthropic_api_key: str = ""
-    llm_model_default: str = "claude-haiku-4-5-20251001"
-    llm_model_hard: str = "claude-sonnet-4-6"
+    llm_provider: str = "gemini"  # "gemini" | "anthropic"
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
 
-    embedding_provider: str = "local"
-    embedding_model: str = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-    embedding_dim: int = 768
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-haiku-4-5"
+
+    llm_max_tokens: int = 700
+    llm_timeout: int = 60
 
     whatsapp_verify_token: str = ""
     whatsapp_access_token: str = ""
@@ -31,6 +25,10 @@ class Settings(BaseSettings):
     app_env: str = "dev"
     log_level: str = "info"
     cors_origins: str = "*"  # prod: "https://4r.com.tr,https://www.4r.com.tr" (virgülle)
+
+    # Konuşma hafızası
+    gecmis_turu: int = 3        # modele verilecek önceki soru/cevap çifti sayısı
+    gecmis_dakika: int = 120    # bu süreden eski turlar hafızaya alınmaz
 
     # Anti-spam / maliyet koruması
     daily_limit: int = 200          # tüm bot, günlük toplam mesaj

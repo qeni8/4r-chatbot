@@ -63,21 +63,19 @@ def parse_rows(path: str) -> list[dict]:
 
 
 def load(kayitlar: list[dict]) -> None:
-    from app.db import get_conn, pool
+    from app.db import get_conn, init_db
 
-    pool.open()
+    init_db()
     with get_conn() as conn:
-        conn.execute("truncate atik_kodlari restart identity")
-        with conn.cursor() as cur:
-            cur.executemany(
-                """insert into atik_kodlari
-                   (kod, kod_temiz, tanim, tehlikeli, merkez, luleburgaz, kapakli, bolum, grup)
-                   values (%(kod)s, %(kod_temiz)s, %(tanim)s, %(tehlikeli)s,
-                           %(merkez)s, %(luleburgaz)s, %(kapakli)s, %(bolum)s, %(grup)s)""",
-                kayitlar,
-            )
+        conn.execute("delete from atik_kodlari")
+        conn.executemany(
+            "insert into atik_kodlari "
+            "(kod, kod_temiz, tanim, tehlikeli, merkez, luleburgaz, kapakli, bolum, grup) "
+            "values (:kod, :kod_temiz, :tanim, :tehlikeli, "
+            ":merkez, :luleburgaz, :kapakli, :bolum, :grup)",
+            kayitlar,
+        )
         conn.commit()
-    pool.close()
 
 
 def main() -> None:

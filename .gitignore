@@ -14,3 +14,7 @@ data/raw/
 *.xlsx
 !data/samples/*.xlsx
 .DS_Store
+*.db
+*.db-wal
+*.db-shm
+.env.bak

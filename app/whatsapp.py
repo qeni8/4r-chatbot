@@ -6,6 +6,7 @@ KVKK: log için telefon numarası ham değil, hash'lenmiş oturum kimliği kulla
 
 import hashlib
 import hmac
+import logging
 import re
 
 import httpx
@@ -13,6 +14,7 @@ import httpx
 from app.config import settings
 
 GRAPH = "https://graph.facebook.com/v22.0"
+log = logging.getLogger(__name__)
 
 
 def verify(mode: str | None, token: str | None, challenge: str | None) -> str | None:
@@ -25,7 +27,12 @@ def verify_signature(raw: bytes, signature: str | None) -> bool:
     """Gelen webhook'un Meta'dan geldiğini X-Hub-Signature-256 ile doğrular."""
     secret = settings.whatsapp_app_secret
     if not secret:
-        return True  # dev: app secret ayarlı değilse doğrulama atlanır
+        # Prod'da secret yoksa webhook herkese açık olurdu → reddet. Yalnızca dev'de atlanır.
+        if settings.app_env == "dev":
+            log.warning("WHATSAPP_APP_SECRET boş — imza doğrulaması atlandı (dev)")
+            return True
+        log.error("WHATSAPP_APP_SECRET ayarlı değil — webhook isteği reddedildi")
+        return False
     if not signature or not signature.startswith("sha256="):
         return False
     beklenen = "sha256=" + hmac.new(secret.encode(), raw, hashlib.sha256).hexdigest()
@@ -55,14 +62,19 @@ def _wa_bicim(metin: str) -> str:
 def send(to: str, metin: str) -> None:
     if not (settings.whatsapp_access_token and settings.whatsapp_phone_number_id):
         return  # token yoksa (dev) sessizce geç
-    httpx.post(
-        f"{GRAPH}/{settings.whatsapp_phone_number_id}/messages",
-        headers={"Authorization": f"Bearer {settings.whatsapp_access_token}"},
-        json={
-            "messaging_product": "whatsapp",
-            "to": to,
-            "type": "text",
-            "text": {"body": _wa_bicim(metin)},
-        },
-        timeout=30,
-    )
+    try:
+        r = httpx.post(
+            f"{GRAPH}/{settings.whatsapp_phone_number_id}/messages",
+            headers={"Authorization": f"Bearer {settings.whatsapp_access_token}"},
+            json={
+                "messaging_product": "whatsapp",
+                "to": to,
+                "type": "text",
+                "text": {"body": _wa_bicim(metin)},
+            },
+            timeout=30,
+        )
+        r.raise_for_status()
+    except httpx.HTTPError:
+        # Sessiz kalırsa müşteri cevapsız kalır ve log'da başarılı görünür — mutlaka kaydet.
+        log.exception("WhatsApp mesajı gönderilemedi")
