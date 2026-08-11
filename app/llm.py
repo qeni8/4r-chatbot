@@ -1,4 +1,5 @@
 import logging
+import time
 
 import httpx
 
@@ -47,6 +48,37 @@ SISTEM = (
 )
 
 
+# Geçici sunucu durumları: sağlayıcı "şu an yoğun" diyor, istek tekrar denenmeli.
+GECICI = {429, 500, 502, 503, 504}
+BEKLEME = (1.5, 4.0)  # deneme sayısı = len(BEKLEME) + 1
+
+
+def _istek_gonder(url: str, headers: dict, govde: dict) -> httpx.Response:
+    """Geçici hatalarda yeniden dener; kalıcı hatada uygun istisnayı yükseltir."""
+    son_hata = ""
+    son_kod = 0
+    for deneme in range(len(BEKLEME) + 1):
+        if deneme:
+            time.sleep(BEKLEME[deneme - 1])
+        try:
+            r = httpx.post(url, headers=headers, json=govde, timeout=settings.llm_timeout)
+        except httpx.HTTPError as e:
+            son_hata, son_kod = f"ağ hatası: {e}", 0
+            log.warning("LLM ağ hatası (deneme %d): %s", deneme + 1, e)
+            continue
+
+        if r.status_code < 400:
+            return r
+        son_hata, son_kod = r.text[:300], r.status_code
+        if r.status_code not in GECICI:
+            raise LLMError(f"Gemini hata {r.status_code}: {son_hata}")
+        log.warning("LLM geçici hata %d (deneme %d)", r.status_code, deneme + 1)
+
+    if son_kod == 429:
+        raise LLMRateLimit(f"Gemini kota limiti: {son_hata}")
+    raise LLMError(f"Gemini erişilemedi ({son_kod or 'ağ'}): {son_hata}")
+
+
 def _kaynak_blok(ek_kaynaklar: list[dict]) -> str:
     parcalar = [f"<kaynak baslik=\"{k['baslik']}\">\n{k['icerik']}\n</kaynak>"
                 for k in ek_kaynaklar]
@@ -68,28 +100,21 @@ def _gemini(soru: str, ek: list[dict], gecmis: list[tuple[str, str]]) -> tuple[s
         contents.append({"role": "model", "parts": [{"text": a}]})
     contents.append({"role": "user", "parts": [{"text": _user_prompt(soru, ek)}]})
 
-    try:
-        r = httpx.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{settings.gemini_model}:generateContent",
-            headers={"x-goog-api-key": settings.gemini_api_key},
-            json={
-                "system_instruction": {"parts": [{"text": SISTEM}]},
-                "contents": contents,
-                "generationConfig": {
-                    "maxOutputTokens": settings.llm_max_tokens,
-                    "temperature": 0.2,
-                },
-            },
-            timeout=settings.llm_timeout,
-        )
-    except httpx.HTTPError as e:
-        raise LLMError(f"Gemini ağ hatası: {e}") from e
-
-    if r.status_code == 429:
-        raise LLMRateLimit(f"Gemini kota limiti: {r.text[:200]}")
-    if r.status_code >= 400:
-        raise LLMError(f"Gemini hata {r.status_code}: {r.text[:300]}")
+    govde = {
+        "system_instruction": {"parts": [{"text": SISTEM}]},
+        "contents": contents,
+        "generationConfig": {
+            "maxOutputTokens": settings.llm_max_tokens,
+            "temperature": 0.2,
+            "thinkingConfig": {"thinkingBudget": settings.gemini_thinking_budget},
+        },
+    }
+    r = _istek_gonder(
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{settings.gemini_model}:generateContent",
+        {"x-goog-api-key": settings.gemini_api_key},
+        govde,
+    )
 
     adaylar = r.json().get("candidates") or []
     if not adaylar:

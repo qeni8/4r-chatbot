@@ -19,10 +19,24 @@ class SahteYanit:
 def _gemini_ayarli(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "test-key")
     monkeypatch.setattr(settings, "llm_provider", "gemini")
+    monkeypatch.setattr(llm.time, "sleep", lambda _s: None)  # yeniden deneme beklemesi
 
 
 def _post(monkeypatch, yanit):
     monkeypatch.setattr(llm.httpx, "post", lambda *a, **kw: yanit)
+
+
+def _post_sirasi(monkeypatch, yanitlar: list):
+    """Ardışık çağrılara sırayla farklı yanıt döndürür (yeniden deneme testi)."""
+    sayac = {"n": 0}
+
+    def _post_fn(*a, **kw):
+        y = yanitlar[min(sayac["n"], len(yanitlar) - 1)]
+        sayac["n"] += 1
+        return y
+
+    monkeypatch.setattr(llm.httpx, "post", _post_fn)
+    return sayac
 
 
 def test_kota_limiti_ayri_istisna(monkeypatch):
@@ -90,6 +104,32 @@ def test_kaynaklar_prompta_girer(monkeypatch):
     metin = yakalanan["json"]["contents"][-1]["parts"][0]["text"]
     assert "06 01 01 kabul: Merkez" in metin
     assert "MÜŞTERİ SORUSU: soru" in metin
+
+
+def test_gecici_hata_sonrasi_toparlar(monkeypatch):
+    """Gemini 'high demand' (503) geçicidir — bot bu yüzden düşmemeli."""
+    basarili = SahteYanit(200, {"candidates": [
+        {"content": {"parts": [{"text": "toparlandı"}]}, "finishReason": "STOP"}
+    ]})
+    sayac = _post_sirasi(monkeypatch, [SahteYanit(503, text="high demand"), basarili])
+    cevap, _ = llm.answer("test")
+    assert cevap == "toparlandı"
+    assert sayac["n"] == 2  # ilk deneme başarısız, ikincisi başarılı
+
+
+def test_kalici_hata_yeniden_denenmez(monkeypatch):
+    """400 gibi kalıcı hatada boşuna beklenmemeli."""
+    sayac = _post_sirasi(monkeypatch, [SahteYanit(400, text="bad request")])
+    with pytest.raises(llm.LLMError):
+        llm.answer("test")
+    assert sayac["n"] == 1
+
+
+def test_surekli_503_llm_error(monkeypatch):
+    _post(monkeypatch, SahteYanit(503, text="high demand"))
+    with pytest.raises(llm.LLMError) as e:
+        llm.answer("test")
+    assert not isinstance(e.value, llm.LLMRateLimit)
 
 
 def test_sistem_promptu_kritik_kurallari_icerir():

@@ -21,6 +21,9 @@ from app.sabitler import DEVIR
 SET = Path("tests/test_set.json")
 DEVIR_IZ = DEVIR[:35].lower()
 RET_IZLERI = ("yardımcı ol", "yardımcı olam", "atık yönetimi", "konusunda", "üzgün", DEVIR_IZ)
+# "Devir" kontrolü birebir kalıba değil anlama bakar: modelin kelimeleri turdan tura değişir.
+DEVIR_ILETISIM = ("282 652 30 90", "info@4r.com.tr")
+DEVIR_RET = ("veremiyorum", "veremem", "aktarayım", "danışabilir", "yetkilimiz", "bulunmamakta")
 # Model çağrısının başarısız olduğu yöntemler — kalite değil altyapı sorunu.
 HATA_YONTEMLERI = {"hata", "yogunluk"}
 
@@ -36,7 +39,10 @@ def degerlendir(item: dict, cevap: str, yontem: str) -> str:
     if exp == "review":
         return "REVIEW"
     if exp == "devir":
-        return "PASS" if DEVIR_IZ in dusuk else "FAIL"
+        # Kesin cevaptan kaçınmalı VE insana yönlendirmeli (birebir cümle şart değil).
+        kacindi = any(iz in dusuk for iz in DEVIR_RET)
+        yonlendirdi = any(iz in dusuk for iz in DEVIR_ILETISIM)
+        return "PASS" if (kacindi and yonlendirdi) else "FAIL"
     if exp == "red":
         # Konu dışı soru: cevaplamamalı. Kibar ret ya da yönlendirme kabul.
         return "PASS" if any(iz in dusuk for iz in RET_IZLERI) else "FAIL"

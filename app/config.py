@@ -10,6 +10,10 @@ class Settings(BaseSettings):
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
+    # 2.5 Flash "düşünen" bir model; düşünme tokenları çıktı bütçesinden harcanır ve
+    # cevabı cümle ortasında kestiriyordu. Bu iş (verilen metinden cevap üretme) düşünme
+    # gerektirmiyor → kapalı. Artırmak için >0 bir bütçe verilebilir.
+    gemini_thinking_budget: int = 0
 
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-haiku-4-5"
