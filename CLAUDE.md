@@ -72,6 +72,11 @@ eski 2.500/85.000 düzeltildi).
 
 ## 5. Durum
 
+> **Ofis Windows bilgisayarındaysan:** kurulum `DEPLOY.md`'dedir, baştan sona uygula.
+> Kullanıcı non-tekniktir — her adımı sade Türkçe anlat, hata çıkarsa dur ve çöz, atlama.
+> Kurulum ancak `DEPLOY.md` Bölüm 12'deki 10 maddenin hepsi doğrulanınca bitmiştir.
+
+
 **Tamam:** atık kodu tablosu · site içeriği · bot çekirdeği · guardrail'ler · web widget ·
 WhatsApp adaptörü · limitler (günlük/oturum/IP) · KVKK saklama · devir kaydı + bildirim +
 müşteri iletişim toplama · yönetim paneli (`/yonetim`) · Windows kalıcı kurulumu

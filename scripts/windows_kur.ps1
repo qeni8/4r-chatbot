@@ -20,7 +20,7 @@ param([string]$Tunel = "")
 $ErrorActionPreference = "Stop"
 $kok = Split-Path -Parent $PSScriptRoot
 $python = Join-Path $kok ".venv\Scripts\python.exe"
-if (-not (Test-Path $python)) { throw "Sanal ortam yok: $python — önce DEPLOY.md Bölüm 2." }
+if (-not (Test-Path $python)) { throw "Sanal ortam yok: $python — önce DEPLOY.md Bölüm 3." }
 
 $ayar = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
     -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero)

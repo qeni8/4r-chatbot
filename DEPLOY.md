@@ -6,7 +6,29 @@
 > **Docker / WSL2 / BIOS ayarı GEREKMİYOR.** Veritabanı tek dosyalık SQLite, embedding modeli yok.
 > Gereken tek şey Python.
 
-## 0. Önkoşullar
+## 0. Claude Code ile başlangıç
+
+Ofis bilgisayarında **PowerShell'i Yönetici olarak** aç ve sırayla:
+
+```powershell
+winget install -e --id Anthropic.ClaudeCode
+```
+
+PowerShell'i **kapat, yeniden aç**. Sonra `claude` yazıp giriş yap.
+
+Ardından Claude'a şunu söyle:
+
+> github.com/qeni8/4r-chatbot reposunu klonla ve DEPLOY.md'yi baştan sona uygula.
+> Her adımda ne yaptığını sade dille anlat, hata çıkarsa dur ve çöz.
+
+Kurulum sırasında senden **üç şey** isteyecek:
+1. **Gemini API anahtarı** — aistudio.google.com → Get API key (`4r_chatbot`, `...QX1g`)
+2. **Yönetim paneli şifresi** — sen belirleyeceksin
+3. **WordPress girişi** — en son adımda, widget'ı siteye eklerken
+
+---
+
+## 1. Önkoşullar
 
 ```powershell
 winget install -e --id Python.Python.3.12
@@ -14,17 +36,22 @@ winget install -e --id Git.Git
 winget install -e --id Cloudflare.cloudflared
 ```
 
-Doğrula: `python --version` (>=3.11), `git --version`, `cloudflared --version`.
 PowerShell'i kurulumdan sonra **kapatıp yeniden aç** (PATH güncellensin).
+Doğrula: `python --version` (>=3.11), `git --version`, `cloudflared --version`.
 
-## 1. Repo
+> ⚠️ **Windows tuzağı:** `python --version` hiçbir şey yazmaz ya da Microsoft Store'u
+> açarsa, Windows'un sahte `python` kısayolu devrededir. Bu durumda **`py -3.12`**
+> kullan (`py -3.12 -m venv .venv`). Kalıcı çözüm: Ayarlar → Uygulamalar →
+> "Uygulama yürütme diğer adları" → `python.exe` ve `python3.exe` **kapat**.
+
+## 2. Repo
 
 ```powershell
 git clone https://github.com/qeni8/4r-chatbot.git
 cd 4r-chatbot
 ```
 
-## 2. Python ortamı
+## 3. Python ortamı
 
 ```powershell
 python -m venv .venv
@@ -32,7 +59,7 @@ python -m venv .venv
 .venv\Scripts\pip install -e ".[ingest,dev]"
 ```
 
-## 3. Ortam değişkenleri
+## 4. Ortam değişkenleri
 
 ```powershell
 copy .env.example .env
@@ -53,7 +80,7 @@ Doldurulacaklar:
   "yetkiliye aktarıyorum" der ama kimseye anlık haber gitmez.
 - Diğerleri varsayılan kalır.
 
-## 4. Atık kodu verisini yükle (ilk kurulumda bir kez)
+## 5. Atık kodu verisini yükle (ilk kurulumda bir kez)
 
 ```powershell
 $env:PYTHONPATH="."
@@ -66,7 +93,7 @@ Ayrıştırılan 6-haneli kod: 842 | tehlikeli: 408 | en az bir tesiste kabul: 3
 Yüklendi: 842 kayıt → atik_kodlari
 ```
 
-## 5. Testler (yayından önce zorunlu doğrulama)
+## 6. Testler (yayından önce zorunlu doğrulama)
 
 ```powershell
 .venv\Scripts\python -m pytest -q
@@ -79,7 +106,7 @@ Kalite ölçümü (Gemini'yi gerçekten çağırır, ~1 dk):
 ```
 Sonuçta **HATA sayısı 0 olmalı**. 0 değilse API anahtarı/kota sorunludur ve ölçüm geçersizdir.
 
-## 6. Uygulamayı çalıştır
+## 7. Uygulamayı çalıştır
 
 ```powershell
 .venv\Scripts\python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
@@ -87,7 +114,7 @@ Sonuçta **HATA sayısı 0 olmalı**. 0 değilse API anahtarı/kota sorunludur v
 Bu terminal açık kalmalı. Kontrol: tarayıcıda `http://localhost:8000/health`
 → `{"status":"ok","atik_kodu":842,"belge":17}`
 
-## 7. Cloudflare Tunnel → herkese açık HTTPS adres
+## 8. Cloudflare Tunnel → herkese açık HTTPS adres
 
 Yeni bir PowerShell penceresinde:
 ```powershell
@@ -97,7 +124,7 @@ cloudflared tunnel --url http://localhost:8000
 
 Test: `https://xxxx.trycloudflare.com/demo` → widget'ı dene.
 
-## 8. WordPress'e widget'ı ekle
+## 9. WordPress'e widget'ı ekle
 
 4r.com.tr yönetim panelinde `</body>` öncesine (tema footer ya da "WPCode" /
 "Insert Headers and Footers" eklentisi):
@@ -107,9 +134,9 @@ Test: `https://xxxx.trycloudflare.com/demo` → widget'ı dene.
 ```
 
 > ⚠️ Hızlı tünel adresi PC/tünel yeniden başlayınca **değişir** ve widget ölür.
-> Bugün launch için kabul; hemen ardından Bölüm 10'daki kalıcı tünelle sabitlenmeli.
+> Bugün launch için kabul; hemen ardından Bölüm 11'deki kalıcı tünelle sabitlenmeli.
 
-## 9. Canlı doğrulama
+## 10. Canlı doğrulama
 
 4r.com.tr'yi aç → sağ altta balon → sırayla dene:
 1. `06 01 01 alıyor musunuz` → Merkez ve Kapaklı, tehlikeli (modelsiz, anında)
@@ -124,7 +151,7 @@ Ayrıca **yönetim panelini** kontrol et: `https://xxxx.trycloudflare.com/yoneti
 
 ---
 
-## 10. Yayından sonra — kalıcı kurulum (aynı gün yapılmalı)
+## 11. Yayından sonra — kalıcı kurulum (aynı gün yapılmalı)
 
 Bugüne kadarki kurulumda bot **terminal açık kaldığı sürece** çalışır ve tünel adresi her
 yeniden başlatmada değişir. İkisini de kalıcı hale getirmek tek script'le yapılır.
@@ -138,8 +165,12 @@ cloudflared tunnel route dns 4r-bot bot.4r.com.tr
 
 **Sonra — Yönetici olarak açılmış PowerShell'de:**
 ```powershell
-.\scripts\windows_kur.ps1 -Tunel 4r-bot
+powershell -ExecutionPolicy Bypass -File .\scripts\windows_kur.ps1 -Tunel 4r-bot
 ```
+
+> Windows varsayılan olarak `.ps1` dosyalarını çalıştırmaz ("betik çalıştırma bu sistemde
+> devre dışı"). Yukarıdaki `-ExecutionPolicy Bypass` bunu **yalnızca o komut için** aşar;
+> sistem ayarı değişmez.
 
 Kurduğu üç Görev Zamanlayıcı görevi:
 
@@ -160,12 +191,47 @@ Kurulum sonrası WordPress'teki script satırını kalıcı adrese çevirin:
 **Haftalık tek iş:** yönetim panelini aç (`https://bot.4r.com.tr/yonetim`) — bekleyen
 talepler ve botun cevaplayamadığı sorular orada.
 
+## 12. Bitiş kontrol listesi
+
+Kurulum ancak bu maddelerin **hepsi** doğrulandığında tamamlanmış sayılır:
+
+```powershell
+.venv\Scripts\python -m pytest -q                    # 120 test geçmeli
+.venv\Scripts\python scripts\run_tests.py           # HATA sayısı 0 olmalı
+curl.exe https://bot.4r.com.tr/health                 # atik_kodu 842, belge 17
+```
+
+| # | Kontrol | Beklenen |
+|---|---|---|
+| 1 | `/health` → `uyarilar` | **boş liste** — dolu ise ayar eksik, listeyi oku ve gider |
+| 2 | `/health` → `atik_kodu` | `842` |
+| 3 | `pytest` | 120 geçti |
+| 4 | `run_tests.py` | HATA `0` — değilse ölçüm geçersizdir |
+| 5 | Panel şifresiz | `401` verir (açık kalmamalı) |
+| 6 | 4r.com.tr'de balon | açılıyor, `06 01 01` sorusuna cevap veriyor |
+| 7 | `bugün hava nasıl` | kibarca reddediyor, yetkiliye aktarmıyor |
+| 8 | Görev Zamanlayıcı | `4R Bot`, `4R Tunel`, `4R Bakim` — üçü de "Hazır" |
+| 9 | Bilgisayarı yeniden başlat | 2 dk içinde `/health` yine cevap veriyor |
+| 10 | `data\yedek\` | içinde bugünün tarihli `.db` dosyası var |
+
+**1. madde en önemlisi:** `uyarilar` listesi botun kendi öz denetimi.
+
+Yayını **bloklayan** uyarılar: `GEMINI_API_KEY boş` · `CORS_ORIGINS='*'` ·
+`LOG_SAKLAMA_GUN=0` · `WHATSAPP_APP_SECRET boş`. Bunlardan biri varsa yayına alma.
+
+Tek **kabul edilebilir** uyarı: *"Bildirim kanalı yok"* — SMTP bilgisi henüz gelmediyse
+normaldir. Bu hâlde talepler kaybolmaz, yönetim panelinde birikir; ama kimseye anlık
+haber gitmez, o yüzden **panel günde bir kez açılmalı**. SMTP gelince uyarı kaybolur.
+
 ## Sorun giderme
 
 | Belirti | Sebep / çözüm |
 |---|---|
-| `/health` açılmıyor | uvicorn terminali kapanmış; Bölüm 6'yı tekrar çalıştır |
-| Widget cevap vermiyor | Tünel adresi değişmiş → Bölüm 8'deki script satırını güncelle |
+| `/health` açılmıyor | uvicorn terminali kapanmış; Bölüm 7'yi tekrar çalıştır |
+| Widget cevap vermiyor | Tünel adresi değişmiş → Bölüm 9'daki script satırını güncelle |
 | Cevaplar "yoğunluk" diyor | Gemini kotası doldu → faturalandırma açık mı kontrol et |
 | `ModuleNotFoundError` | `.venv\Scripts\pip install -e ".[ingest,dev]"` tekrar çalıştır |
 | Widget siteye eklendi ama açılmıyor | `CORS_ORIGINS` 4r.com.tr'yi içeriyor mu, `.env` kaydedildi mi |
+| `python` komutu Store açıyor | Windows sahte kısayolu → `py -3.12` kullan (Bölüm 1 notu) |
+| `.ps1 çalıştırılamıyor` | `powershell -ExecutionPolicy Bypass -File ...` ile çağır |
+| Görev Zamanlayıcı görevi "Çalışıyor" ama site ölü | Görev geçmişine bak; `.env` yolu göreli olduğu için görev **çalışma klasörü** proje kökü olmalı |
