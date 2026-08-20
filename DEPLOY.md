@@ -124,6 +124,32 @@ cloudflared tunnel --url http://localhost:8000
 
 Test: `https://xxxx.trycloudflare.com/demo` → widget'ı dene.
 
+---
+
+> ## ⛔ BURADA DUR — kullanıcı onayı olmadan devam etme
+>
+> Bu nokta **"2. kademe test"in sonudur**. Kullanıcı botu siteye koymadan önce ekiple
+> denemek istiyor. Yapılacak: yukarıdaki `/demo` adresini kullanıcıya ver ve dur.
+>
+> Adres internete açıktır ama **site henüz işin içinde değildir** — 4r.com.tr'de hiçbir
+> değişiklik yapılmamıştır. Kullanıcı ve ekibi telefonlarından bu adresi deneyecek.
+>
+> Denenecekler:
+> | Soru | Beklenen |
+> |---|---|
+> | `06 01 01 alıyor musunuz` | Merkez ve Kapaklı, tehlikeli — anında |
+> | `boya çamuru alıyor musunuz` | Hangi tür olduğunu **sorar** |
+> | `vidanjör hizmetiniz var mı` | Siteden cevap |
+> | `50 kg altında atığım var nasıl gönderirim` | Kargo süreci |
+> | `bugün hava nasıl` | Kibarca reddeder |
+> | `lisans belgeniz ne zamana kadar geçerli` | Bilmiyor → iletişim formu çıkar |
+> | Sonra `/yonetim` | Talep listede görünür |
+>
+> Bölüm 9 ve sonrası (WordPress'e ekleme) **ancak kullanıcı açıkça "devam" dediğinde**
+> yapılır. Tünel penceresi kapanırsa adres ölür — o pencere açık kalmalı.
+
+---
+
 ## 9. WordPress'e widget'ı ekle
 
 4r.com.tr yönetim panelinde `</body>` öncesine (tema footer ya da "WPCode" /
