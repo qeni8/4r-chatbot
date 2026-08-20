@@ -46,6 +46,10 @@ Doldurulacaklar:
   Bu hacimde gerçek maliyet ~$2-5/ay; Google Cloud'da $10 bütçe uyarısı kurulu.
 - `CORS_ORIGINS=https://4r.com.tr,https://www.4r.com.tr` — widget yalnızca siteden çağrılsın.
 - `APP_ENV=prod`
+- `YONETIM_SIFRE=...` — yönetim panelinin şifresi (kullanıcıdan al). Boş bırakılırsa
+  panel kapalı olur ve bekleyen talepler görülemez.
+- `BILDIRIM_EPOSTA` + `SMTP_*` — varsa doldur. Yoksa talepler yalnızca panelde görünür
+  (bot yine "yetkiliye aktarıyorum" der ama kimseye anlık haber gitmez).
 - Diğerleri varsayılan kalır.
 
 ## 4. Atık kodu verisini yükle (ilk kurulumda bir kez)
@@ -113,6 +117,9 @@ Test: `https://xxxx.trycloudflare.com/demo` → widget'ı dene.
 4. `bugün hava nasıl` → kibarca reddetmeli
 
 Panel altında KVKK notu görünür olmalı.
+
+Ayrıca **yönetim panelini** kontrol et: `https://xxxx.trycloudflare.com/yonetim`
+(kullanıcı `4r`, şifre `.env`'deki `YONETIM_SIFRE`). Bekleyen talepler burada görünür.
 
 ---
 

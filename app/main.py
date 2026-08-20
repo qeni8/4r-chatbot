@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
-from app import bot, devir, knowledge, whatsapp
+from app import bot, devir, knowledge, whatsapp, yonetim
 from app.config import settings, yapilandirma_uyarilari
 from app.db import eski_loglari_temizle, get_conn, init_db
 
@@ -42,6 +42,9 @@ app.add_middleware(
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
+
+
+app.include_router(yonetim.router)
 
 
 @app.get("/widget.js")

@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     smtp_from: str = ""            # boşsa smtp_user kullanılır
     bildirim_arkaplan: bool = True  # testlerde False → eşzamanlı
 
+    # --- Yönetim paneli ---
+    # Şifre boşsa panel tamamen kapalıdır (kazara açık kalmasın).
+    yonetim_kullanici: str = "4r"
+    yonetim_sifre: str = ""
+
     app_env: str = "dev"
     log_level: str = "info"
     # KVKK: konuşma logları kişisel veridir, süresiz saklanamaz. Açılışta bu yaştan

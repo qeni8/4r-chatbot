@@ -64,6 +64,14 @@ Her mesaj loglanır.
 | `db/schema.sql` | SQLite şeması: `atik_kodlari` + `konusma_loglari` |
 | `web/` | `widget.js` (gömülebilir) · `demo.html` |
 
+## Yönetim paneli
+
+`/yonetim` (HTTP Basic — `YONETIM_KULLANICI` / `YONETIM_SIFRE`). Şifre boşsa panel kapalıdır.
+
+Gösterdikleri: bugün/7 gün mesaj sayısı · **bekleyen talepler** (müşteri iletişim bırakanlar
+yeşil vurgulu) · botun neyi bilmediği (sebep bazında 30 günlük döküm) · son konuşmalar.
+Talep "Tamam" ile okundu işaretlenir.
+
 ## Test & izleme
 
 ```bash
