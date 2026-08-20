@@ -59,7 +59,7 @@ Her mesaj loglanır.
 | Yol | İçerik |
 |---|---|
 | `app/` | `main.py` (API) · `bot.py` (orkestrasyon) · `router.py` · `waste_lookup.py` · `knowledge.py` · `llm.py` · `devir.py` · `limits.py` · `yonetim.py` · `whatsapp.py` · `db.py` · `config.py` · `sabitler.py` |
-| `scripts/` | `ingest_atik_kodlari.py` · `fetch_site.py` · `refresh.py` · `run_tests.py` |
+| `scripts/` | `ingest_atik_kodlari.py` · `fetch_site.py` · `refresh.py` · `run_tests.py` · `bakim.py` · `windows_kur.ps1` |
 | `data/site/` | Site içeriği (bot bilgisinin kaynağı, düz Markdown) |
 | `db/schema.sql` | SQLite şeması: `atik_kodlari` · `konusma_loglari` · `devir_kayitlari` |
 | `web/` | `widget.js` (gömülebilir) · `demo.html` |
@@ -78,6 +78,7 @@ Talep "Tamam" ile okundu işaretlenir.
 pytest -q                       # hermetik regresyon (DB/model gerektirmez)
 python scripts/run_tests.py     # 40 soruluk kalite seti — HATA sayısı 0 olmalı
 python scripts/refresh.py       # site içeriği değiştiğinde tazele
+python scripts/bakim.py         # sağlık kontrolü + veritabanı yedeği (Windows'ta saat başı)
 ```
 
 > `scripts/` dosyaları `app` paketini import eder. Editable kurulum yapılmadıysa

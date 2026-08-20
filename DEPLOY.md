@@ -123,17 +123,41 @@ Ayrıca **yönetim panelini** kontrol et: `https://xxxx.trycloudflare.com/yoneti
 
 ---
 
-## 10. Yayından sonra — sağlamlaştırma (aynı gün yapılmalı)
+## 10. Yayından sonra — kalıcı kurulum (aynı gün yapılmalı)
 
-1. **Kalıcı tünel + alt alan adı** (`bot.4r.com.tr`) — adres bir daha değişmez,
-   WordPress'teki script satırı sabitlenir. `cloudflared tunnel login` → `tunnel create` →
-   DNS kaydı → `tunnel run`.
-2. **Windows servisi** (NSSM ya da Görev Zamanlayıcı) — PC yeniden başlayınca bot kendiliğinden
-   ayağa kalksın, terminal açık kalmak zorunda olmasın.
-3. **Güç ayarları** — PC uyku moduna girmesin (Denetim Masası → Güç Seçenekleri → Uyku: Asla).
-4. **Yedek** — `data\4r_chatbot.db` tek dosya; günlük kopyası alınsın (konuşma logları burada).
-5. **İzleme** — haftada bir: yönetim paneli `/yonetim`
-   (cevapsız kalan sorular = havuza eklenecek içerik).
+Bugüne kadarki kurulumda bot **terminal açık kaldığı sürece** çalışır ve tünel adresi her
+yeniden başlatmada değişir. İkisini de kalıcı hale getirmek tek script'le yapılır.
+
+**Önce kalıcı tünel** (adres bir daha değişmez → WordPress'teki script satırı sabitlenir):
+```powershell
+cloudflared tunnel login
+cloudflared tunnel create 4r-bot
+cloudflared tunnel route dns 4r-bot bot.4r.com.tr
+```
+
+**Sonra — Yönetici olarak açılmış PowerShell'de:**
+```powershell
+.\scripts\windows_kur.ps1 -Tunel 4r-bot
+```
+
+Kurduğu üç Görev Zamanlayıcı görevi:
+
+| Görev | Ne zaman | Ne yapar |
+|---|---|---|
+| `4R Bot` | Bilgisayar açılınca | Botu başlatır; çökerse 1 dk içinde yeniden kaldırır |
+| `4R Tunel` | Bilgisayar açılınca | `bot.4r.com.tr` tünelini açar |
+| `4R Bakim` | Saat başı | Bot yanıt vermiyorsa **yetkiliye uyarı gönderir**; veritabanını yedekler |
+
+Ayrıca bilgisayarın uyku moduna girmesini kapatır. Yedekler `data\yedek\` altında
+tarihle adlandırılır, `YEDEK_SAKLAMA_GUN` (varsayılan 14) günden eskiler silinir.
+
+Kurulum sonrası WordPress'teki script satırını kalıcı adrese çevirin:
+```html
+<script src="https://bot.4r.com.tr/widget.js"></script>
+```
+
+**Haftalık tek iş:** yönetim panelini aç (`https://bot.4r.com.tr/yonetim`) — bekleyen
+talepler ve botun cevaplayamadığı sorular orada.
 
 ## Sorun giderme
 

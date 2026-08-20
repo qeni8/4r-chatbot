@@ -74,13 +74,13 @@ eski 2.500/85.000 düzeltildi).
 
 **Tamam:** atık kodu tablosu · site içeriği · bot çekirdeği · guardrail'ler · web widget ·
 WhatsApp adaptörü · limitler (günlük/oturum/IP) · KVKK saklama · devir kaydı + bildirim +
-müşteri iletişim toplama · yönetim paneli (`/yonetim`).
+müşteri iletişim toplama · yönetim paneli (`/yonetim`) · Windows kalıcı kurulumu
+(`scripts/windows_kur.ps1`: açılışta başlat, çökerse kaldır, saat başı sağlık + yedek).
 
 **Ölçüm:** 40 soruluk kalite seti → 33 PASS / 7 REVIEW / 0 FAIL / 0 HATA.
-112 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
+118 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
 
-**Kalan (kod):** Windows servisi + kalıcı tünel + yedekleme (yayın günü) · otomatik test (CI) ·
-test setini gerçek SSS ile büyütme.
+**Kalan (kod):** otomatik test (CI) · test setini gerçek SSS ile büyütme.
 
 **Kalan (kullanıcıdan):** `SENIN_YAPACAKLARIN.md` — GitHub push onayı, Windows kurulumu,
 Gemini faturalandırma, SMTP/WhatsApp bildirim bilgileri, panel şifresi, mağaza fiyatları,

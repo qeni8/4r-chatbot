@@ -46,6 +46,10 @@ class Settings(BaseSettings):
 
     app_env: str = "dev"
     log_level: str = "info"
+
+    # --- Bakım (scripts/bakim.py, saat başı) ---
+    saglik_url: str = "http://localhost:8000/health"
+    yedek_saklama_gun: int = 14
     # KVKK: konuşma logları kişisel veridir, süresiz saklanamaz. Açılışta bu yaştan
     # eski kayıtlar silinir (CLAUDE.md Bölüm 9). 0 = temizleme kapalı.
     log_saklama_gun: int = 180
