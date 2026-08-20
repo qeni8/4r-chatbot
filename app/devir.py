@@ -38,10 +38,14 @@ SEBEP_ETIKET = {
 # --------------------------------------------------------------------------- bildirim
 
 
+def _liste(deger: str) -> list[str]:
+    return [p.strip() for p in deger.split(",") if p.strip()]
+
+
 def _eposta_gonder(baslik: str, govde: str) -> bool:
-    if not (settings.smtp_host and settings.bildirim_eposta):
+    if not settings.smtp_host:
         return False
-    alicilar = [a.strip() for a in settings.bildirim_eposta.split(",") if a.strip()]
+    alicilar = _liste(settings.bildirim_eposta)
     if not alicilar:
         return False
 
@@ -63,10 +67,12 @@ def _eposta_gonder(baslik: str, govde: str) -> bool:
 def _whatsapp_gonder(baslik: str, govde: str) -> bool:
     from app import whatsapp
 
-    if not (settings.bildirim_whatsapp and settings.whatsapp_access_token
+    numaralar = _liste(settings.bildirim_whatsapp)
+    if not (numaralar and settings.whatsapp_access_token
             and settings.whatsapp_phone_number_id):
         return False
-    whatsapp.send(settings.bildirim_whatsapp, f"*{baslik}*\n\n{govde}")
+    for numara in numaralar:
+        whatsapp.send(numara, f"*{baslik}*\n\n{govde}")
     return True
 
 

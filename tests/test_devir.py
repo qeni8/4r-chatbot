@@ -115,3 +115,35 @@ def test_kanal_yoksa_kayit_yine_tutulur(monkeypatch):
     monkeypatch.setattr(settings, "bildirim_eposta", "")
     monkeypatch.setattr(settings, "bildirim_whatsapp", "")
     assert devir.bildir("baslik", "govde") == []
+
+
+def test_birden_cok_eposta_alicisi(monkeypatch):
+    gonderilen = {}
+    monkeypatch.setattr(settings, "smtp_host", "mail.4r.com.tr")
+    monkeypatch.setattr(settings, "bildirim_eposta",
+                        "lojistik@4r.com.tr, info@4r.com.tr ,mudur@4r.com.tr")
+
+    class _SMTP:
+        def __init__(self, *a, **kw): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def starttls(self): pass
+        def login(self, *a): pass
+        def send_message(self, msg): gonderilen["to"] = msg["To"]
+
+    monkeypatch.setattr(devir.smtplib, "SMTP", _SMTP)
+    assert devir._eposta_gonder("baslik", "govde") is True
+    assert gonderilen["to"] == "lojistik@4r.com.tr, info@4r.com.tr, mudur@4r.com.tr"
+
+
+def test_birden_cok_whatsapp_numarasi(monkeypatch):
+    from app import whatsapp
+
+    gidenler = []
+    monkeypatch.setattr(settings, "bildirim_whatsapp", "905321112233,905339998877")
+    monkeypatch.setattr(settings, "whatsapp_access_token", "t")
+    monkeypatch.setattr(settings, "whatsapp_phone_number_id", "1")
+    monkeypatch.setattr(whatsapp, "send", lambda to, metin: gidenler.append(to))
+
+    assert devir._whatsapp_gonder("baslik", "govde") is True
+    assert gidenler == ["905321112233", "905339998877"]

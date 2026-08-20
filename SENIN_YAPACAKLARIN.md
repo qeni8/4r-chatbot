@@ -37,21 +37,29 @@ Kurulum bitince sana bir adres verilecek. WordPress yöneticisinde `</body>` ön
 Bot cevaplayamadığı soruları kaydediyor ama **kimseye haber gidemiyor** — kanal yok.
 (Yönetim panelinden görülebiliyor, ama kimse anlık haberdar olmuyor.)
 
-### 2.1 E-posta bildirimi — SMTP bilgileri
-`info@4r.com.tr` kutusunun ayarları. Hosting/e-posta panelinden alınır:
+### 2.1 Bildirim kime gidecek
+Varsayılan: **lojistik@4r.com.tr**. Virgülle çoğaltılabilir, hepsine aynı anda gider:
+```
+BILDIRIM_EPOSTA=lojistik@4r.com.tr,info@4r.com.tr
+```
+Kaç kişi olacağını sen söyle, ben yazarım.
+
+### 2.2 E-posta göndermek için SMTP bilgileri
+Botun postayı hangi kutudan yollayacağı. `lojistik@4r.com.tr` olabilir — alıcıyla aynı
+olması sorun değil. Hosting/e-posta panelinden alınır:
 - Sunucu adresi (ör. `mail.4r.com.tr`)
 - Port (genelde `587`)
 - Kullanıcı adı (genelde e-posta adresinin kendisi)
 - Şifre
 
-> Bilmiyorsan hosting firmasına *"info@4r.com.tr için SMTP giden posta ayarları"*
+> Bilmiyorsan hosting firmasına *"lojistik@4r.com.tr için SMTP giden posta ayarları"*
 > diye sorman yeterli.
 
-### 2.2 WhatsApp bildirimi — yetkili telefonu
-Devir olduğunda haber verilecek numara (ör. `905321112233`).
-Meta WhatsApp hesabı canlıya alınınca çalışır.
+### 2.3 Telefon bildirimi (isteğe bağlı)
+WhatsApp üzerinden gider, o da virgülle çoğaltılabilir: `905321112233,905339998877`.
+**Meta WhatsApp hesabı canlıya alınmadan çalışmaz** — o yüzden şimdilik e-posta tek kanal.
 
-### 2.3 Yönetim paneli şifresi
+### 2.4 Yönetim paneli şifresi
 Talepleri göreceğin panel için belirleyeceğin bir şifre. Sen söyle, ben ayarlarım.
 
 ---
