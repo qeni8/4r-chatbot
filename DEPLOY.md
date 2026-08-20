@@ -48,8 +48,9 @@ Doldurulacaklar:
 - `APP_ENV=prod`
 - `YONETIM_SIFRE=...` — yönetim panelinin şifresi (kullanıcıdan al). Boş bırakılırsa
   panel kapalı olur ve bekleyen talepler görülemez.
-- `BILDIRIM_EPOSTA` + `SMTP_*` — varsa doldur. Yoksa talepler yalnızca panelde görünür
-  (bot yine "yetkiliye aktarıyorum" der ama kimseye anlık haber gitmez).
+- `BILDIRIM_EPOSTA` + `SMTP_*` — varsa doldur (varsayılan alıcı `lojistik@4r.com.tr`;
+  virgülle çoğaltılabilir). Yoksa talepler yalnızca panelde görünür — bot yine
+  "yetkiliye aktarıyorum" der ama kimseye anlık haber gitmez.
 - Diğerleri varsayılan kalır.
 
 ## 4. Atık kodu verisini yükle (ilk kurulumda bir kez)
