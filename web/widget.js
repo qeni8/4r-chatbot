@@ -115,22 +115,35 @@
     kilit(true);
     var bekle = ekle('<span class="r4-typing">yazıyor...</span>', "r4-bot");
 
+    // Sunucu/tünel takılırsa arayüz süresiz kilitli kalmasın.
+    var iptal = window.AbortController ? new AbortController() : null;
+    var zamanasimi = setTimeout(function () { if (iptal) iptal.abort(); }, 45000);
+
     fetch(CHAT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: q, session_id: sid(), channel: "web" })
+      body: JSON.stringify({ message: q, session_id: sid(), channel: "web" }),
+      signal: iptal ? iptal.signal : undefined
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
       .then(function (data) {
-        bekle.innerHTML = bicimle(data.answer || "");
+        if (!data || !data.answer) throw new Error("bos yanit");
+        bekle.innerHTML = bicimle(data.answer);
         if (data.sources && data.sources.length) {
           ekle("Kaynak: " + esc(data.sources.slice(0, 3).join(", ")), "r4-src");
         }
       })
       .catch(function () {
-        bekle.innerHTML = esc("Bağlantı hatası. Lütfen tekrar yazın.");
+        bekle.innerHTML = esc(
+          "Şu an bağlantı kuramadım. Lütfen tekrar deneyin ya da bize ulaşın: " +
+          "+90 282 652 30 90"
+        );
       })
       .then(function () {
+        clearTimeout(zamanasimi);
         kilit(false);
         input.focus();
         msgs.scrollTop = msgs.scrollHeight;

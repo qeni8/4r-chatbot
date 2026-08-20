@@ -144,6 +144,13 @@ Korpusun küçüklüğü (17 belge / ~5.000 kelime) ölçüldükten sonra vektö
   sessizce "yoğunluk" mesajına çevrilip testte muaf tutuluyordu — kalite hiç ölçülmemişti;
   (4) prod'da boş `WHATSAPP_APP_SECRET` webhook'u herkese açık bırakıyordu.
 - **Bekleyen veriler:** `EKSIKLER.md` (mağaza fiyatları, lisanslar, SSS, "Merkez" tesisi).
+- **Sağlamlaştırma (sonraki tur):** (1) cevap gönderilmeden önce içindeki atık kodları
+  tabloya karşı doğrulanır — uydurma kod kullanıcıya ulaşmaz; (2) KVKK saklama süresi
+  (`LOG_SAKLAMA_GUN=180`) açılışta uygulanır; (3) `oturum_id` taklit edilebildiği için
+  IP bazlı günlük limit eklendi (ham IP saklanmaz, hash'lenir); (4) yanlış yapılandırma
+  açılışta loglanır ve `/health` içinde görünür; (5) widget'ta zaman aşımı + HTTP hata
+  kontrolü (arayüz süresiz kilitli kalmıyor).
+- **Kalite ölçümü:** 40 soru → 33 PASS / 7 REVIEW / 0 FAIL / 0 HATA. 84 hermetik pytest.
 
 ## 14. İlerleme
 - [x] **Adım 1 — Atık kodu tablosu** tamam: 842 kod Postgres'e yüklendi, yapısal sorgu

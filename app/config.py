@@ -47,3 +47,29 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def yapilandirma_uyarilari() -> list[str]:
+    """Yayında sessizce bozuk çalışmaya yol açacak ayarları tespit eder.
+
+    Açılışta loglanır ve /health üzerinden görünür; kurulumdaki en sık hatalar burada
+    yakalanmazsa bot çalışıyor görünüp her soruda yetkiliye devrediyor olur.
+    """
+    u: list[str] = []
+    prod = settings.app_env != "dev"
+
+    if settings.llm_provider == "gemini" and not settings.gemini_api_key:
+        u.append("GEMINI_API_KEY boş — serbest sorular cevaplanamaz, hepsi yetkiliye devredilir.")
+    if settings.llm_provider == "anthropic" and not settings.anthropic_api_key:
+        u.append("ANTHROPIC_API_KEY boş — serbest sorular cevaplanamaz.")
+    if settings.llm_provider not in ("gemini", "anthropic"):
+        u.append(f"LLM_PROVIDER tanınmıyor: {settings.llm_provider!r} (gemini | anthropic)")
+
+    if prod:
+        if settings.cors_origins.strip() == "*":
+            u.append("CORS_ORIGINS='*' — widget her siteden çağrılabilir; 4r.com.tr'ye daraltın.")
+        if not settings.whatsapp_app_secret and settings.whatsapp_access_token:
+            u.append("WHATSAPP_APP_SECRET boş — gelen webhook istekleri reddedilecek.")
+        if settings.log_saklama_gun <= 0:
+            u.append("LOG_SAKLAMA_GUN=0 — konuşma logları süresiz saklanır (KVKK riski).")
+    return u

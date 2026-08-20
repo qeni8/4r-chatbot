@@ -33,13 +33,18 @@ Mesaj → limit kontrolü → selam kısayolu → yönlendirme
   └─ serbest soru
         → tüm site içeriği (17 belge) + varsa isimle eşleşen kodlar → LLM
 
+Cevap gönderilmeden önce: içindeki atık kodları tabloya karşı doğrulanır.
 Bilmiyorsa / konu dışıysa / hata → insana devir. Her mesaj loglanır.
 ```
 
 - **Neden vektör arama yok:** korpus 17 belge / ~5.000 kelime. Tamamı tek istekte modele
   sığıyor; parçalama ve benzerlik araması yalnızca ıskalama riski ve kurulum yükü ekliyordu.
 - **Atık kodu asla modele yorumlatılmaz** — kabul/red bilgisi tablodan gelir (`app/waste_lookup.py`).
-  İsimle aramada birden çok aday varsa bot seçmez, **sorar**.
+  İsimle aramada birden çok aday varsa bot seçmez, **sorar**. Model yine de tabloda olmayan
+  bir kod yazarsa cevap gönderilmez (`gecersiz_kodlar` denetimi) — yanlış kodla atık
+  göndermek en pahalı hata olduğu için son savunma hattı.
+- **Koruma katmanları:** günlük/oturum/IP limitleri (`app/limits.py`), KVKK saklama süresi
+  (`LOG_SAKLAMA_GUN`), yapılandırma denetimi (`/health` → `uyarilar`).
 - **LLM:** Gemini (`LLM_PROVIDER=gemini`). Kaliteden memnun kalınmazsa tek satırla Anthropic'e
   geçiş: `LLM_PROVIDER=anthropic` + `pip install -e ".[anthropic]"`.
 

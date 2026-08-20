@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 from app import bot, knowledge, whatsapp
-from app.config import settings
+from app.config import settings, yapilandirma_uyarilari
 from app.db import eski_loglari_temizle, get_conn, init_db
 
 WEB = Path(__file__).resolve().parent.parent / "web"
@@ -28,6 +28,8 @@ async def lifespan(app: FastAPI):
     if silinen:
         log.info("KVKK saklama süresi: %d eski konuşma kaydı silindi", silinen)
     log.info("Bilgi havuzu yüklendi: %d belge", knowledge.yukle())
+    for uyari in yapilandirma_uyarilari():
+        log.warning("YAPILANDIRMA: %s", uyari)
     yield
 
 
@@ -57,7 +59,15 @@ def demo() -> str:
 def health() -> dict:
     with get_conn() as conn:
         kod_sayisi = conn.execute("select count(*) from atik_kodlari").fetchone()[0]
-    return {"status": "ok", "atik_kodu": kod_sayisi, "belge": knowledge.yukle()}
+    uyarilar = yapilandirma_uyarilari()
+    hazir = kod_sayisi > 0 and not uyarilar
+    return {
+        "status": "ok" if hazir else "uyari",
+        "atik_kodu": kod_sayisi,
+        "belge": knowledge.yukle(),
+        "saglayici": settings.llm_provider,
+        "uyarilar": uyarilar,
+    }
 
 
 class ChatRequest(BaseModel):

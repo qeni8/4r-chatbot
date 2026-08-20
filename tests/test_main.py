@@ -14,6 +14,10 @@ from app.config import settings
 @pytest.fixture
 def client(monkeypatch):
     monkeypatch.setattr(bot.llm, "answer", lambda *a, **kw: ("Test cevabı.", "sahte-model"))
+    # Sağlık çıktısı ortamdaki .env'e bağlı kalmasın.
+    monkeypatch.setattr(settings, "app_env", "dev")
+    monkeypatch.setattr(settings, "llm_provider", "gemini")
+    monkeypatch.setattr(settings, "gemini_api_key", "test-anahtar")
     with TestClient(main.app) as c:
         yield c
 
@@ -23,7 +27,16 @@ def test_health(client):
     assert r.status_code == 200
     veri = r.json()
     assert veri["status"] == "ok"
+    assert veri["uyarilar"] == []
     assert veri["atik_kodu"] > 0   # şema + veri gerçekten yüklü mü
+
+
+def test_health_yanlis_yapilandirmayi_bildirir(client, monkeypatch):
+    """Anahtar eksikse bot 'çalışıyor' görünüp her soruda devretmemeli — sağlıkta görünsün."""
+    monkeypatch.setattr(settings, "gemini_api_key", "")
+    veri = client.get("/health").json()
+    assert veri["status"] == "uyari"
+    assert any("GEMINI_API_KEY" in u for u in veri["uyarilar"])
 
 
 def test_chat_yapisal_cevap(client):
