@@ -66,6 +66,31 @@ def test_isimle_arama_kaynak_ekler(sahte_llm):
     assert "08 01 14" in kaynak_metni
 
 
+def test_uydurma_atik_kodu_kullaniciya_gitmez(monkeypatch):
+    """Model tabloda olmayan bir kod yazarsa cevap gönderilmemeli (en pahalı hata)."""
+    monkeypatch.setattr(bot.llm, "answer",
+                        lambda *a, **kw: ("Bu atığı 07 07 07 koduyla gönderebilirsiniz.", "m"))
+    r = reply("hangi kodla göndermeliyim", "test-uydurma", "web")
+    assert r["method"] == "kod_dogrulama"
+    assert "07 07 07" not in r["answer"]
+
+
+def test_gecerli_kod_iceren_cevap_gecer(monkeypatch):
+    """Doğrulama yanlış alarm vermemeli: tabloda olan kod normal geçmeli."""
+    monkeypatch.setattr(bot.llm, "answer",
+                        lambda *a, **kw: ("08 01 14 kodlu atığı kabul ediyoruz.", "m"))
+    r = reply("boya çamuru hangi kod", "test-gecerli", "web")
+    assert r["method"] == "rag"
+
+
+def test_iletisim_numarasi_kod_sanilmaz(monkeypatch):
+    """Cevaptaki telefon numarası 'uydurma kod' olarak işaretlenmemeli."""
+    monkeypatch.setattr(bot.llm, "answer",
+                        lambda *a, **kw: ("Bilgi için: +90 282 652 30 90, info@4r.com.tr", "m"))
+    r = reply("telefon numaranız", "test-tel", "web")
+    assert r["method"] == "rag"
+
+
 def test_llm_kota_limiti_yogunluk_mesaji(monkeypatch):
     def _limit(*a, **kw):
         raise llm.LLMRateLimit("kota")

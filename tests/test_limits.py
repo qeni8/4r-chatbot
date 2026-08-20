@@ -7,12 +7,14 @@ from app.config import settings
 from app.db import get_conn
 
 
-def _log_ekle(oturum: str, adet: int, yontem: str = "rag", gecmis_gun: int = 0) -> None:
+def _log_ekle(oturum: str, adet: int, yontem: str = "rag", gecmis_gun: int = 0,
+              istemci: str | None = None) -> None:
     with get_conn() as conn:
         conn.executemany(
-            "insert into konusma_loglari (kanal, oturum_id, soru, cevap, yontem, created_at) "
-            "values ('web', ?, 's', 'c', ?, datetime('now', ?))",
-            [(oturum, yontem, f"-{gecmis_gun} days") for _ in range(adet)],
+            "insert into konusma_loglari "
+            "(kanal, oturum_id, istemci, soru, cevap, yontem, created_at) "
+            "values ('web', ?, ?, 's', 'c', ?, datetime('now', ?))",
+            [(oturum, istemci, yontem, f"-{gecmis_gun} days") for _ in range(adet)],
         )
         conn.commit()
 
@@ -74,3 +76,29 @@ def test_oturumsuz_istek_global_limite_tabi(monkeypatch):
 def test_check_daima_ikili_doner(oturum):
     izin, mesaj = limits.check(oturum)
     assert isinstance(izin, bool) and isinstance(mesaj, str)
+
+
+def test_ip_limiti_oturum_degistirmeyi_engeller(monkeypatch):
+    """oturum_id tarayıcıda üretilir; değiştirilerek limit aşılmamalı."""
+    monkeypatch.setattr(settings, "ip_daily_limit", 4)
+    monkeypatch.setattr(settings, "burst_limit", 1000)
+    # Saldırgan her mesajda farklı oturum_id kullanıyor ama IP aynı.
+    for i in range(4):
+        _log_ekle(f"sahte-oturum-{i}", 1, istemci="ip-hash-1")
+
+    izin, mesaj = limits.check("bambaska-oturum", "ip-hash-1")
+    assert izin is False
+    assert "mesaj sınırına" in mesaj
+
+
+def test_ip_limiti_baska_kullaniciyi_etkilemez(monkeypatch):
+    monkeypatch.setattr(settings, "ip_daily_limit", 2)
+    _log_ekle("o1", 5, istemci="ip-hash-1")
+    izin, _ = limits.check("o2", "ip-hash-2")
+    assert izin is True
+
+
+def test_istemcisiz_istek_calisir(monkeypatch):
+    """WhatsApp gibi IP'siz kanallar limit kontrolünde çökmemeli."""
+    izin, _ = limits.check("wa-oturum", None)
+    assert izin is True

@@ -42,9 +42,9 @@ Bu atığı şu an hiçbir tesisimizde kabul edemiyoruz. Dilerseniz sizi yetkili
 Hangisini soruyorsunuz?
 
 [REVIEW] plastik atığı alıyor musunuz
-  -> Evet, plastik atıklarınızı alıyoruz. Lüleburgaz ve Kapaklı tesislerimizde plastik atık kabulü yapmaktayız.
+  -> Evet, plastik atıklarınızı alıyoruz. Lüleburgaz ve Kapaklı tesislerimizde plastik atık kabulü yapılmaktadır.
 
-Plastik atıklarınız için kabul ettiğimiz bazı atık kodları şunlardır:
+Plastik atıklar için bazı atık kodları şunlardır:
 *   16 01 19 — Plastik
 *   17 02 03 — Plastik
 *   20 01 39 — Plastikler
@@ -54,16 +54,16 @@ Plastik atıklarınız için kabul ettiğimiz bazı atık kodları şunlardır:
 *   12 01 05 — Plastik yongalar ve çapaklar
 *   02 01 04 — Atık plastikler (ambalajlar hariç)
 
-Atıklarınızın türüne ve miktarına göre size özel çözümler sunabiliriz. Daha fazla bilgi veya atık gönderimi için bizimle iletişime geçebilirsiniz.
+Hangi atık kodunun sizin atığınıza uygun olduğunu belirlemek için daha fazla bilgiye ihtiyacımız olabilir.
 
 [REVIEW] boya çamuru atığını kabul ediyor musunuz
   -> Evet, boya çamuru atıklarını kabul ediyoruz.
 
-Eğer atığınız organik çözücüler ya da diğer tehlikeli maddeler içeren boya ve vernik çamurları (08 01 13*) veya organik çözücüler ya da diğer tehlikeli maddeler içeren boya ve vernikli sulu çamurlar (08 01 15*) ise, bu tehlikeli atıklar Merkez, Lüleburgaz ve Kapaklı tesislerimizde kabul edilmektedir.
+Atık kodu tablosuna göre, 08 01 14 (08 01 13 dışındaki boya ve vernik çamurları) ve 08 01 16 (08 01 15 dışındaki boya ve vernik içeren sulu çamurlar) kodlu atıklar Merkez, Lüleburgaz ve Kapaklı tesislerimizde kabul edilmektedir.
 
-Eğer atığınız 08 01 13 dışındaki boya ve vernik çamurları (08 01 14) veya 08 01 15 dışındaki boya ve vernik içeren sulu çamurlar (08 01 16) ise, bu atıklar da Merkez, Lüleburgaz ve Kapaklı tesislerimizde kabul edilmektedir.
+Eğer atığınız organik çözücüler veya diğer tehlikeli maddeler içeriyorsa, 08 01 13* (TEHLİKELİ) veya 08 01 15* (TEHLİKELİ) kodlu atıklar da aynı tesislerimizde kabul edilmektedir.
 
-Hangi atık koduna sahip olduğunuzu belirtirseniz daha net bilgi verebiliriz.
+Hangi atık kodunun sizin durumunuza uygun olduğunu belirtirseniz daha detaylı yardımcı olabiliriz.
 
 [PASS] lisanslı vidanjör hizmetiniz var mı
   -> Evet, 4R Çevre ve Enerji olarak Çevre, Şehircilik ve İklim Değişikliği Bakanlığı'ndan lisanslı vidanjör araçlarımızla atık su ve sıvı atıkların toplanması ve güvenli şekilde bertaraf edilmesi hizmetini sunuyoruz.
@@ -72,12 +72,12 @@ Hangi atık koduna sahip olduğunuzu belirtirseniz daha net bilgi verebiliriz.
   -> Evet, 4R Çevre ve Enerji olarak kirlenmiş solventleri ileri teknolojili distilasyon sistemlerimizle geri kazanarak yeniden kullanılabilir hale getiriyoruz. Bu sayede hem işletmelerin hammadde maliyetlerini düşürüyor hem de çevresel sürdürülebilirliğe katkı sağlıyoruz.
 
 [PASS] atık su arıtma hizmetiniz nasıl çalışıyor
-  -> 4R Çevre ve Enerji olarak, atık su arıtma hizmetlerimizde suyun kaynağına ve kirlilik yüküne göre özelleştirilmiş sistemler kullanıyoruz. Süreçlerimiz ön arıtma, fiziksel arıtma, biyolojik arıtma ve kimyasal arıtma adımlarını içerir. İleri arıtma teknikleri de opsiyonel olarak uygulanabilmektedir.
+  -> 4R Çevre ve Enerji olarak atık su arıtma hizmetlerimiz, suyun kaynağına ve kirlilik yüküne göre özelleştirilir. Süreçlerimiz ön arıtma, fiziksel arıtma, biyolojik arıtma ve kimyasal arıtma adımlarını içerir. İhtiyaca göre ileri arıtma teknikleri de uygulanabilir.
 
-Bu hizmeti endüstriyel tesisler, organize sanayi bölgeleri, belediyeler, otel ve tatil köyleri gibi birçok alanda sunuyoruz.
+Bu hizmetlerle su kaynaklarının korunmasını, toplum sağlığının güvence altına alınmasını ve yasal yükümlülüklerin yerine getirilmesini sağlıyoruz.
 
 [PASS] atıktan türetilmiş yakıt üretiyor musunuz
-  -> Evet, 4R Çevre ve Enerji olarak lisanslı tesisimizde atıktan türetilmiş yakıt (ATY) üretimi yapıyoruz. Bu sayede atıkları bertaraf ederken endüstriyel yakıt ihtiyacına da katkı sağlıyoruz.
+  -> Evet, 4R Çevre ve Enerji olarak lisanslı tesisimizde çeşitli atık türlerinden yüksek kalorifik değere sahip Atıktan Türetilmiş Yakıt (ATY) üretiyoruz. Bu sayede hem atıkları bertaraf ediyor hem de endüstriyel yakıt ihtiyacına katkı sağlıyoruz.
 
 [PASS] elektronik atık işliyor musunuz
   -> Evet, 4R Çevre ve Enerji olarak lisanslı tesisimizde elektrikli ve elektronik atıkları (e-atıklar) mevzuata uygun şekilde işliyor, değerli bileşenlerini geri kazanırken zararlı maddelerin çevreye yayılmasını önlüyoruz.
@@ -85,25 +85,21 @@ Bu hizmeti endüstriyel tesisler, organize sanayi bölgeleri, belediyeler, otel 
 Bu süreçte atık kabulü ve sınıflandırma, söküm ve ayırma, geri kazanım ve bertaraf adımlarını uyguluyoruz.
 
 [PASS] akümülatör depolaması yapıyor musunuz
-  -> Evet, 4R Çevre ve Enerji olarak lisanslı tesisimizde akümülatör atıklarını yönetmeliklere uygun şekilde güvenli olarak depoluyoruz. Bu hizmet, kullanılmış akülerin çevreye zarar vermeden, güvenli ve yasalara uygun bir şekilde geçici olarak depolanmasını sağlar.
+  -> Evet, 4R Çevre ve Enerji olarak lisanslı tesisimizde akümülatör atıklarını yönetmeliklere uygun şekilde güvenli olarak geçici depoluyoruz. Bu atıkları daha sonra lisanslı bertaraf veya geri kazanım tesislerine sevk ediyoruz.
 
 [PASS] ibc tank yıkama hizmetiniz var mı
-  -> Evet, IBC tank yıkama hizmetimiz bulunmaktadır. Tanklar, içerdikleri maddelere göre özel temizlik yöntemleriyle yıkanır, dezenfekte edilir ve tekrar kullanıma hazır hale getirilir. Bu süreçte otomatik ve manuel temizlik sistemleri kullanılır, tehlikeli kimyasallara özel yıkama protokolleri uygulanır ve atık su arıtımı çevreye zarar vermeyecek şekilde yapılır.
+  -> Evet, IBC tank yıkama hizmetimiz bulunmaktadır. Tanklar, içerdikleri maddelere göre özel temizlik yöntemleriyle yıkanır, dezenfekte edilir ve tekrar kullanıma hazır hale getirilir. Bu süreçte otomatik ve manuel temizlik sistemleri kullanılır, tehlikeli kimyasallara özel yıkama protokolleri uygulanır ve atık su arıtımı çevreye zarar vermeden gerçekleştirilir.
 
 [PASS] tehlikeli atık taşıma yapıyor musunuz
-  -> Evet, tehlikeli atık taşıma hizmeti sunuyoruz. Çevre mevzuatına tam uyumlu, güvenli ve belgeli bir şekilde bu hizmeti sağlıyoruz.
-
-Taşıma sürecimiz atık sınıflandırması ve kodlama, ambalajlama ve etiketleme, lisanslı taşıma araçları, e-ÇBS üzerinden kayıt ve teslim/raporlama adımlarını içerir. Daha fazla bilgi için bizimle iletişime geçebilirsiniz.
+  -> Evet, tehlikeli atık taşıma hizmeti sunuyoruz. Çevre mevzuatına tam uyumlu, güvenli, kontrollü ve belgeli şekilde tehlikeli atıklarınızı taşıyoruz.
 
 [PASS] ara depolama hizmetiniz nedir
-  -> 4R Çevre ve Enerji olarak, tehlikeli ve tehlikesiz atıklar için ara depolama hizmeti sunuyoruz. Bu hizmetle, atıkların insan sağlığına ve çevreye zarar vermeden, güvenli bir şekilde geçici olarak muhafaza edilmesini sağlıyoruz.
+  -> 4R Çevre ve Enerji olarak, insan sağlığına ve çevreye zarar verme potansiyeli taşıyan atıkları geçici olarak güvenli bir şekilde muhafaza ediyoruz. Tesisimizde kartuş, toner, yağ, katran, tehlikeli maddeler içeren kablolar, kalıntı barındıran metaller, ahşap, cam ve plastik gibi çeşitli tehlikeli atıkları kabul edip geri kazanım sürecine dahil ediyoruz.
 
-Tesisimizde kartuş, toner, yağ, katran, tehlikeli maddeler içeren kablolar, kalıntı barındıran metaller, ahşap, cam ve plastik gibi çeşitli tehlikeli atıkları kabul edip geri kazanım sürecine dahil ediyoruz. Depolama alanlarımız güvenli, çevre dostu ve izole edilmiş olup, atıklar türlerine göre sınıflandırılarak uygun kaplarda etiketlenir ve takip edilir.
+Bu süreçte güvenli ve çevre dostu alanlar kullanıyor, atıkları sınıflandırıyor, uygun depolama kapları ve etiketleme sistemleri ile takip ediyoruz. Ayrıca tesis girişleri ve depolama alanları yetkisiz erişime karşı korunmakta ve sistemler düzenli olarak kontrol edilmektedir.
 
 [PASS] entegre atık yönetimi ne demek
-  -> Entegre atık yönetimi, atık azaltımı, toplama, taşıma, geri dönüşüm, organik atık yönetimi, enerji geri kazanımı ve tehlikeli atık yönetimi gibi süreçleri kapsayan kapsamlı bir yaklaşımdır. Bu süreçte, atıktan türetilmiş yakıt (ATY) üretimi de yer almaktadır.
-
-Amacımız, atık üretimini en aza indirirken kaynakların verimli kullanılmasını sağlamak ve çevresel etkileri azaltmaktır.
+  -> Entegre atık yönetimi, atıkların oluşumundan bertarafına kadar tüm süreçlerin bir bütün olarak ele alınmasıdır. Bu süreç, atık azaltımı, toplama, taşıma, geri dönüşüm, organik atık yönetimi, enerji geri kazanımı, tehlikeli atık yönetimi ve atıktan türetilmiş yakıt (ATY) üretimi gibi aşamaları kapsar. Amacı, çevresel etkileri en aza indirirken kaynak verimliliğini artırmak ve ekonomik değer yaratmaktır.
 
 [PASS] adresiniz nedir
   -> Adresimiz Fatih Mahallesi 73. Sokak No:18, 59510 Kapaklı, Tekirdağ'dır.
@@ -139,27 +135,25 @@ Amacımız, atık üretimini en aza indirirken kaynakların verimli kullanılmas
   -> Bu konuda yardımcı olamıyorum, ancak atık yönetimi hizmetlerimizle ilgili sorularınız olursa memnuniyetle yanıtlayabilirim.
 
 [PASS] bitcoin fiyatı ne kadar
-  -> Bu konuda yardımcı olamıyorum. 4R Çevre ve Enerji olarak atık yönetimi hizmetleri sunmaktayız. Atıklarınızla ilgili bir sorunuz olursa memnuniyetle yardımcı olabilirim.
+  -> Bu konuda yardımcı olamıyorum. 4R Çevre ve Enerji olarak atık yönetimi hizmetleri sunmaktayız. Atıklarınızın yönetimi ile ilgili bir sorunuz varsa yardımcı olabilirim.
 
 [PASS] atık depolamak yasal olarak zorunlu mu, hukuki görüşünüz nedir
   -> Atık depolamanın yasal olarak zorunlu olup olmadığı konusunda kesin bir hukuki görüş veremiyorum. Ancak, 4R Çevre ve Enerji olarak atıkların güvenli ve yasalara uygun bir şekilde geçici olarak depolanmasının sürdürülebilir atık yönetiminin önemli adımlarından biri olduğunu belirtmek isterim.
 
-Bu konuda daha detaylı bilgi almak için yetkilimizle iletişime geçebilirsiniz:
-Telefon: +90 282 652 30 90
-E-posta: info@4r.com.tr
+Bu konuda kesin bilgi almak için yetkilimize danışabilirsiniz. İletişim bilgilerimiz: +90 282 652 30 90 veya info@4r.com.tr.
 
 [PASS] bana bir şaka yap
-  -> Bu konuda size yardımcı olamam. Ancak atık yönetimi veya 4R Çevre ve Enerji'nin hizmetleri hakkında sorularınız varsa memnuniyetle cevaplayabilirim.
+  -> Bu konuda yardımcı olamam. Ancak atık yönetimi ve çevre hizmetlerimizle ilgili sorularınız olursa memnuniyetle yanıtlayabilirim.
 
 [PASS] merhaba
   -> Merhaba! Size nasıl yardımcı olabilirim? Atık kodu, hizmetlerimiz veya gönderim hakkında sorabilirsiniz.
 
 [REVIEW] nasıl yardımcı olabilirsiniz
-  -> 4R Çevre ve Enerji olarak atık yönetimi konusunda geniş bir yelpazede hizmet sunuyoruz. Tehlikeli ve tehlikesiz atıkların toplanması, taşınması, ara depolanması, geri kazanımı ve bertarafı gibi konularda size yardımcı olabiliriz.
+  -> 4R Çevre ve Enerji olarak atık yönetimi konusunda çeşitli hizmetler sunuyoruz. Tehlikeli ve tehlikesiz atıkların toplanması, taşınması, ara depolanması, geri kazanımı ve bertarafı gibi konularda size yardımcı olabiliriz.
 
-Özellikle 50 kg altı atık gönderimi, akümülatör geçici depolama, atık su arıtma, atıktan türetilmiş yakıt (ATY) üretimi, elektrikli ve elektronik atık işleme, entegre atık yönetimi, IBC tank hizmetleri (alım, satım, yıkama, rebottle), lisanslı vidanjör hizmeti, solvent geri kazanımı ve tehlikeli atık taşımacılığı gibi alanlarda çözümlerimiz bulunmaktadır.
+Özellikle 50 kg altı atık gönderimi, atık su arıtma, atıktan türetilmiş yakıt (ATY) üretimi, elektrikli ve elektronik atık işleme, akümülatör geçici depolama, solvent geri kazanımı, IBC tank hizmetleri ve lisanslı vidanjör hizmetleri gibi alanlarda çözümler sunmaktayız.
 
-Hangi konuda bilgi almak istersiniz?
+Hangi konuda yardıma ihtiyacınız olduğunu belirtirseniz size daha detaylı bilgi verebilirim.
 
 [PASS] 15 01 10 alıyor musunuz
   -> 15 01 10* — Tehlikeli maddelerin kalıntılarını içeren ya da tehlikeli maddelerle kontamine olmuş ambalajlar.
@@ -167,20 +161,20 @@ Hangi konuda bilgi almak istersiniz?
 Evet ✅ bu atığı **Lüleburgaz ve Kapaklı** tesislerimizde alıyoruz. Tehlikeli atık sınıfındadır. Göndermek isterseniz süreci anlatabilirim.
 
 [REVIEW] peki bunu nasıl gönderebilirim
-  -> 50 kg altındaki tehlikeli atıklarınızı kargo ile gönderebilirsiniz. Bu süreçte 4R Çevre ve Enerji olarak size destek oluyoruz.
+  -> 50 kg altı atık gönderimi için özel bir sürecimiz bulunmaktadır. Atığınızı kargo ile gönderebilirsiniz.
 
-İşlemler şu adımları içerir:
-1.  **Atığın Tanımlanması:** Atık kodunuzu belirledik.
-2.  **EÇBS Üzerinden Beyan:** Firmanızın EÇBS sistemine girerek "Atık Gönderim Bildirimi" oluşturmanız gerekiyor. Eğer EÇBS sisteminiz yoksa veya destek isterseniz, 4R uzmanları size yardımcı olabilir.
-3.  **Taşıma veya Kargo:** Atıklarınızı kargo ile gönderebilirsiniz. Bu atıkların taşınmasında lisanslı araç zorunluluğu yoktur ancak UATF (Ulusal Atık Taşıma Formu) kullanılır.
-4.  **Teslim ve Bertaraf:** Atıklar lisanslı tesisimize ulaştığında "Teslim Alındı" olarak işaretlenir ve gönderiminiz tamamlanır.
+Süreç şu adımları içerir:
+1.  **Atığın Tanımlanması:** Atığınızın türü ve kodu belirlenir.
+2.  **EÇBS Üzerinden Beyan:** EÇBS sistemine giriş yaparak "Atık Gönderim Bildirimi" oluşturmanız gerekmektedir. Eğer 50 kg altı gönderimse, firmanızın EÇBS sistemine girerek (yoksa ücretsiz destek için bizimle iletişime geçebilirsiniz), Atık Gönderim İşlemleri > ÖTL / 50 kg altı / Foto. Atıkları > taşıma talebi ekleme kısmına girmeniz gerekir. Burada üretici bilgileri, atık kodu, miktar, taşıyıcı ve alıcı tesis bilgileri girilir.
+3.  **Taşıma veya Kargo:** Atık, Çevre, Şehircilik ve İklim Değişikliği Bakanlığı'nın belirlediği lisanslı tesislere (4R Çevre ve Enerji) teslim edilmelidir. Taşıma sırasında uygun etiketleme yapılır, sızdırmaz ambalaj kullanılır ve taşıma formu (UATF) dijital olarak EÇBS'de onaylanır. Tıbbi atıklar hariç, tek seferde 50 kg altında taşınacak atıklar için lisanslı araç taşıma zorunluluğu yoktur, ancak UATF kullanılır. Otomatik kargo kodu almak için talep oluşturabilir ve Türkiye'nin her yerinden kapınızdan teslim edebilirsiniz.
+4.  **Teslim ve Bertaraf:** Atık, lisanslı ara depolama veya geri kazanım tesisine teslim edilir. Tesis, atığı aldığı anda sistemde "Teslim Alındı" olarak işaretler.
 
-Otomatik kargo kodu almak için talep oluşturabilir ve Türkiye'nin her yerinden kapınızdan teslim edilmesini sağlayabilirsiniz. EÇBS sisteminden aldığınız taşıma numarası ile hemen göndermek için web sitemizdeki ilgili bağlantıyı kullanabilirsiniz.
+4R Çevre ve Enerji olarak, 50 kg altı atıklarınızın kargo ile taşınması, EÇBS beyanlarınızın uzmanlarımız tarafından yapılması ve tüm belgelerin (UATF, irsaliye, tartım fişi) dijital olarak teslim edilmesi konularında size destek oluyoruz.
 
-4R Çevre ve Enerji'nin "Mikro Gönderim Programı" ile 50 kg altı atıklarınız kargo ile taşınır, EÇBS beyanlarınız uzmanlarımız tarafından yapılır ve tüm belgeler dijital olarak size teslim edilir.
+Daha fazla bilgi veya kargo kodu oluşturmak için bizimle iletişime geçebilirsiniz: +90 282 652 30 90 veya info@4r.com.tr.
 
 [PASS] solvent geri kazanıyor musunuz
-  -> Evet, 4R Çevre ve Enerji olarak kirlenmiş solventleri ileri teknolojili distilasyon sistemlerimiz ile geri kazanarak yeniden kullanılabilir hale getiriyoruz. Bu sayede hem işletmelerin hammadde maliyetlerini düşürüyor hem de çevresel sürdürülebilirliğe katkı sağlıyoruz.
+  -> Evet, 4R Çevre ve Enerji olarak kirlenmiş solventleri ileri teknolojili distilasyon sistemlerimizle geri kazanarak yeniden kullanılabilir hale getiriyoruz. Bu sayede hem işletmelerin hammadde maliyetlerini düşürüyor hem de çevresel sürdürülebilirliğe katkı sağlıyoruz.
 
 [REVIEW] hangi solventleri kabul ediyorsunuz
   -> 4R Çevre ve Enerji olarak tiner, aseton, toluol, metanol, butanol, etil asetat, izopropil alkol, ksilen ve M.E.K. (Metil Etil Keton) gibi solventleri geri kazanım için kabul ediyoruz.

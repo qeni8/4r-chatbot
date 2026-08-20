@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 from contextlib import asynccontextmanager
@@ -10,7 +11,7 @@ from pydantic import BaseModel
 
 from app import bot, knowledge, whatsapp
 from app.config import settings
-from app.db import get_conn, init_db
+from app.db import eski_loglari_temizle, get_conn, init_db
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 log = logging.getLogger(__name__)
@@ -23,6 +24,9 @@ async def lifespan(app: FastAPI):
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     init_db()
+    silinen = eski_loglari_temizle()
+    if silinen:
+        log.info("KVKK saklama süresi: %d eski konuşma kaydı silindi", silinen)
     log.info("Bilgi havuzu yüklendi: %d belge", knowledge.yukle())
     yield
 
@@ -68,9 +72,23 @@ class ChatResponse(BaseModel):
     sources: list[str] = []
 
 
+def istemci_kimligi(request: Request) -> str | None:
+    """Kötüye kullanım sayacı için IP'den türetilmiş kimlik.
+
+    KVKK: ham IP saklanmaz, hash'lenir. Cloudflare Tunnel arkasında gerçek IP
+    CF-Connecting-IP başlığında gelir; doğrudan erişimde soketten alınır.
+    """
+    ip = request.headers.get("cf-connecting-ip")
+    if not ip:
+        fwd = request.headers.get("x-forwarded-for")
+        ip = fwd.split(",")[0].strip() if fwd else (request.client.host
+                                                    if request.client else None)
+    return hashlib.sha256(ip.encode()).hexdigest()[:16] if ip else None
+
+
 @app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest) -> ChatResponse:
-    r = bot.reply(req.message, req.session_id, req.channel)
+def chat(req: ChatRequest, request: Request) -> ChatResponse:
+    r = bot.reply(req.message, req.session_id, req.channel, istemci_kimligi(request))
     return ChatResponse(answer=r["answer"], method=r["method"], sources=r["sources"])
 
 

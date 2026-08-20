@@ -168,6 +168,29 @@ def _answer_group(prefix: str) -> str:
     return f"{prefix} grubundaki kodlar:\n{satir}\nHangisini soruyorsunuz?"
 
 
+def gecersiz_kodlar(metin: str) -> list[str]:
+    """Metinde geçip tabloda BULUNMAYAN 6-haneli kodlar.
+
+    Son savunma hattı: modele tablo kaynak olarak verilse bile yanlış kod yazabilir.
+    Müşterinin atığını hatalı kodla göndermesi en pahalı hata olduğu için cevap
+    kullanıcıya gitmeden önce burada denetlenir. Telefon/tarih maskelenmiş metin kullanılır.
+    """
+    from app.router import kodlar_bul
+
+    kodlar, _ = kodlar_bul(metin)
+    if not kodlar:
+        return []
+    yer = ",".join("?" * len(kodlar))
+    with get_conn() as conn:
+        var = {
+            r[0]
+            for r in conn.execute(
+                f"select kod_temiz from atik_kodlari where kod_temiz in ({yer})", kodlar
+            ).fetchall()
+        }
+    return [k for k in kodlar if k not in var]
+
+
 def answer(text: str) -> str:
     """Deterministik Türkçe cevap; çoklu kod ve gürültü toleranslı. Kod yoksa boş dize."""
     from app.router import kodlar_bul

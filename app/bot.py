@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from functools import partial
 
 from app import limits, llm, router, waste_lookup
 from app.config import settings
@@ -29,18 +30,18 @@ SELAM_CEVAP = ("Merhaba! Size nasıl yardımcı olabilirim? Atık kodu, hizmetle
 TESEKKUR_CEVAP = "Rica ederim! Başka bir sorunuz olursa buradayım."
 
 # Bu yöntemler hafızaya alınmaz: bilgi taşımaz ya da hatalı cevaptır (promptu kirletir).
-HAFIZA_DISI = ("limit", "hata", "yogunluk", "selam")
+HAFIZA_DISI = ("limit", "hata", "yogunluk", "selam", "kod_dogrulama")
 
 
 def _log(kanal: str, oturum_id: str | None, soru: str, cevap: str,
-         yontem: str, kaynaklar: list[str], model: str) -> None:
+         yontem: str, kaynaklar: list[str], model: str, istemci: str | None = None) -> None:
     try:
         with get_conn() as conn:
             conn.execute(
                 "insert into konusma_loglari "
-                "(kanal, oturum_id, soru, cevap, yontem, kaynaklar, model) "
-                "values (?, ?, ?, ?, ?, ?, ?)",
-                (kanal, oturum_id, soru, cevap, yontem,
+                "(kanal, oturum_id, istemci, soru, cevap, yontem, kaynaklar, model) "
+                "values (?, ?, ?, ?, ?, ?, ?, ?)",
+                (kanal, oturum_id, istemci, soru, cevap, yontem,
                  json.dumps(kaynaklar, ensure_ascii=False), model),
             )
             conn.commit()
@@ -67,31 +68,35 @@ def _sonuc(answer: str, method: str, sources: list[str]) -> dict:
     return {"answer": answer, "method": method, "sources": sources}
 
 
-def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
+def reply(mesaj: str, oturum_id: str | None, kanal: str = "web",
+          istemci: str | None = None) -> dict:
     mesaj = (mesaj or "").strip()
     if not mesaj:
         return _sonuc(BOS, "bos", [])
     if len(mesaj) > MAX_INPUT:
         mesaj = mesaj[:MAX_INPUT]
 
-    izin, uyari = limits.check(oturum_id)
+    kaydet = partial(_log, kanal, oturum_id, istemci=istemci)
+
+    izin, uyari = limits.check(oturum_id, istemci)
     if not izin:
-        _log(kanal, oturum_id, mesaj, uyari, "limit", [], "-")
+        kaydet(mesaj, uyari, "limit", [], "-")
         return _sonuc(uyari, "limit", [])
 
     for kalip, cevap in ((SELAM, SELAM_CEVAP), (TESEKKUR, TESEKKUR_CEVAP)):
         if kalip.match(mesaj):
-            _log(kanal, oturum_id, mesaj, cevap, "selam", [], "-")
+            kaydet(mesaj, cevap, "selam", [], "-")
             return _sonuc(cevap, "selam", [])
 
     ek_kaynaklar: list[dict] = []
+    kesin = ""
 
     tur, kod = router.kod_bul(mesaj)
     if tur:
         kesin = waste_lookup.answer(mesaj)
         if kesin and router.sadece_kabul(mesaj):
             # Saf "bu kodu alıyor musunuz" → modele hiç uğramadan kesin cevap.
-            _log(kanal, oturum_id, mesaj, kesin, "atik_kodu", [], "-")
+            kaydet(mesaj, kesin, "atik_kodu", [], "-")
             return _sonuc(kesin, "atik_kodu", [])
         if kesin:
             # Kod + başka soru (fiyat/gönderim/süreç) → tablo sonucu modele kaynak olur.
@@ -109,12 +114,20 @@ def reply(mesaj: str, oturum_id: str | None, kanal: str = "web") -> dict:
         cevap, model = llm.answer(mesaj, ek_kaynaklar, _gecmis(oturum_id))
     except llm.LLMRateLimit:
         log.warning("LLM kota limiti — kullanıcı yetkiliye yönlendirildi", exc_info=True)
-        _log(kanal, oturum_id, mesaj, YOGUNLUK, "yogunluk", kaynak_adlari, settings.llm_provider)
+        kaydet(mesaj, YOGUNLUK, "yogunluk", kaynak_adlari, settings.llm_provider)
         return _sonuc(YOGUNLUK, "yogunluk", kaynak_adlari)
     except Exception:
         log.exception("LLM cevabı üretilemedi")
-        _log(kanal, oturum_id, mesaj, DEVIR, "hata", kaynak_adlari, settings.llm_provider)
+        kaydet(mesaj, DEVIR, "hata", kaynak_adlari, settings.llm_provider)
         return _sonuc(DEVIR, "hata", kaynak_adlari)
 
-    _log(kanal, oturum_id, mesaj, cevap, "rag", kaynak_adlari, model)
+    # Son denetim: model tabloda olmayan bir atık kodu yazdıysa cevabı kullanıcıya gönderme.
+    uydurma = waste_lookup.gecersiz_kodlar(cevap)
+    if uydurma:
+        log.error("Model tabloda olmayan atık kodu üretti: %s | soru: %r", uydurma, mesaj)
+        guvenli = kesin or DEVIR
+        kaydet(mesaj, guvenli, "kod_dogrulama", kaynak_adlari, model)
+        return _sonuc(guvenli, "kod_dogrulama", kaynak_adlari)
+
+    kaydet(mesaj, cevap, "rag", kaynak_adlari, model)
     return _sonuc(cevap, "rag", kaynak_adlari)

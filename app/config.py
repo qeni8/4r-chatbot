@@ -28,6 +28,9 @@ class Settings(BaseSettings):
 
     app_env: str = "dev"
     log_level: str = "info"
+    # KVKK: konuşma logları kişisel veridir, süresiz saklanamaz. Açılışta bu yaştan
+    # eski kayıtlar silinir (CLAUDE.md Bölüm 9). 0 = temizleme kapalı.
+    log_saklama_gun: int = 180
     cors_origins: str = "*"  # prod: "https://4r.com.tr,https://www.4r.com.tr" (virgülle)
 
     # Konuşma hafızası
@@ -38,6 +41,9 @@ class Settings(BaseSettings):
     daily_limit: int = 200          # tüm bot, günlük toplam mesaj
     session_daily_limit: int = 25   # tek oturum/kişi, günlük
     burst_limit: int = 5            # tek oturum, son 60 saniye
+    # oturum_id tarayıcıda üretilir → değiştirilerek oturum limiti aşılabilir.
+    # IP bazlı ikinci sınır, tek kişinin günlük bütçeyi bitirmesini engeller.
+    ip_daily_limit: int = 60
 
 
 settings = Settings()

@@ -6,7 +6,7 @@ from app.sabitler import ILETISIM
 SAYILAN = "yontem <> 'limit'"
 
 
-def check(session_id: str | None) -> tuple[bool, str]:
+def check(session_id: str | None, istemci: str | None = None) -> tuple[bool, str]:
     """(izin_var, mesaj). Sınır aşılırsa izin False ve kullanıcıya gösterilecek mesaj döner."""
     with get_conn() as conn:
         gunluk = conn.execute(
@@ -16,6 +16,16 @@ def check(session_id: str | None) -> tuple[bool, str]:
         if gunluk >= settings.daily_limit:
             return False, ("Bugünkü yanıt kapasitemiz doldu. Sizi yetkilimize aktarayım: "
                            f"{ILETISIM}")
+
+        if istemci:
+            ip_gunluk = conn.execute(
+                f"select count(*) from konusma_loglari where istemci = ? "
+                f"and created_at >= date('now') and {SAYILAN}",
+                (istemci,),
+            ).fetchone()[0]
+            if ip_gunluk >= settings.ip_daily_limit:
+                return False, ("Bugün için mesaj sınırına ulaştınız. Detaylı destek için "
+                               f"yetkilimize ulaşabilirsiniz: {ILETISIM}")
 
         if session_id:
             burst = conn.execute(

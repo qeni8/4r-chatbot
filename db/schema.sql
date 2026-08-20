@@ -20,7 +20,8 @@ create index if not exists idx_atik_kod_temiz on atik_kodlari (kod_temiz);
 create table if not exists konusma_loglari (
     id          integer primary key autoincrement,
     kanal       text not null,               -- 'web' | 'whatsapp'
-    oturum_id   text,
+    oturum_id   text,                        -- istemci üretir (taklit edilebilir)
+    istemci     text,                        -- KVKK: ham IP değil, hash'lenmiş kimlik
     soru        text not null,
     cevap       text,
     yontem      text,                        -- 'atik_kodu' | 'rag' | 'selam' | 'limit' | 'hata'
