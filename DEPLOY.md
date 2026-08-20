@@ -196,7 +196,7 @@ talepler ve botun cevaplayamadığı sorular orada.
 Kurulum ancak bu maddelerin **hepsi** doğrulandığında tamamlanmış sayılır:
 
 ```powershell
-.venv\Scripts\python -m pytest -q                    # 120 test geçmeli
+.venv\Scripts\python -m pytest -q                    # 122 test geçmeli
 .venv\Scripts\python scripts\run_tests.py           # HATA sayısı 0 olmalı
 curl.exe https://bot.4r.com.tr/health                 # atik_kodu 842, belge 17
 ```
@@ -205,7 +205,7 @@ curl.exe https://bot.4r.com.tr/health                 # atik_kodu 842, belge 17
 |---|---|---|
 | 1 | `/health` → `uyarilar` | **boş liste** — dolu ise ayar eksik, listeyi oku ve gider |
 | 2 | `/health` → `atik_kodu` | `842` |
-| 3 | `pytest` | 120 geçti |
+| 3 | `pytest` | 122 geçti |
 | 4 | `run_tests.py` | HATA `0` — değilse ölçüm geçersizdir |
 | 5 | Panel şifresiz | `401` verir (açık kalmamalı) |
 | 6 | 4r.com.tr'de balon | açılıyor, `06 01 01` sorusuna cevap veriyor |

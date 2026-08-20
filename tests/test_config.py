@@ -14,7 +14,8 @@ def _saglikli_varsayilan(monkeypatch):
     monkeypatch.setattr(settings, "whatsapp_app_secret", "gizli")
     monkeypatch.setattr(settings, "whatsapp_access_token", "token")
     monkeypatch.setattr(settings, "log_saklama_gun", 180)
-    monkeypatch.setattr(settings, "bildirim_eposta", "info@4r.com.tr")
+    monkeypatch.setattr(settings, "bildirim_eposta", "lojistik@4r.com.tr")
+    monkeypatch.setattr(settings, "smtp_host", "mail.4r.com.tr")
 
 
 def test_saglikli_yapilandirma_uyari_vermez():
@@ -51,9 +52,23 @@ def test_bildirim_kanali_yoksa_uyarir(monkeypatch):
     """Botun 'yetkiliye aktarıyorum' sözü boşta kalıyorsa bu sessiz kalmamalı."""
     monkeypatch.setattr(settings, "bildirim_eposta", "")
     monkeypatch.setattr(settings, "bildirim_whatsapp", "")
-    assert any("Bildirim kanalı yok" in u for u in yapilandirma_uyarilari())
+    assert any("Bildirim gönderilemiyor" in u for u in yapilandirma_uyarilari())
 
 
 def test_tanimsiz_saglayici_yakalanir(monkeypatch):
     monkeypatch.setattr(settings, "llm_provider", "groq")
     assert any("LLM_PROVIDER" in u for u in yapilandirma_uyarilari())
+
+
+def test_alicisi_var_ama_smtp_yoksa_uyarir(monkeypatch):
+    """Alıcı yazılı diye 'her şey yolunda' denmemeli — posta yine gitmiyor."""
+    monkeypatch.setattr(settings, "smtp_host", "")
+    assert any("Bildirim gönderilemiyor" in u for u in yapilandirma_uyarilari())
+
+
+def test_smtp_yoksa_calisir_whatsapp_yeter(monkeypatch):
+    monkeypatch.setattr(settings, "smtp_host", "")
+    monkeypatch.setattr(settings, "bildirim_eposta", "")
+    monkeypatch.setattr(settings, "bildirim_whatsapp", "905321112233")
+    monkeypatch.setattr(settings, "whatsapp_phone_number_id", "1")
+    assert yapilandirma_uyarilari() == []

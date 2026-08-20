@@ -83,7 +83,7 @@ müşteri iletişim toplama · yönetim paneli (`/yonetim`) · Windows kalıcı 
 (`scripts/windows_kur.ps1`: açılışta başlat, çökerse kaldır, saat başı sağlık + yedek).
 
 **Ölçüm:** 40 soruluk kalite seti → 33 PASS / 7 REVIEW / 0 FAIL / 0 HATA.
-118 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
+122 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
 
 **Kalan (kod):** otomatik test (CI) · test setini gerçek SSS ile büyütme.
 

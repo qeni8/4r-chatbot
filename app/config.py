@@ -94,7 +94,13 @@ def yapilandirma_uyarilari() -> list[str]:
             u.append("WHATSAPP_APP_SECRET boş — gelen webhook istekleri reddedilecek.")
         if settings.log_saklama_gun <= 0:
             u.append("LOG_SAKLAMA_GUN=0 — konuşma logları süresiz saklanır (KVKK riski).")
-        if not (settings.bildirim_eposta or settings.bildirim_whatsapp):
-            u.append("Bildirim kanalı yok — bot 'yetkiliye aktarıyorum' diyor ama kimseye "
-                     "haber gitmiyor. BILDIRIM_EPOSTA veya BILDIRIM_WHATSAPP ayarlayın.")
+        # Alıcı yazılı olması yetmez: gönderim yolu da kurulu olmalı. Aksi halde
+        # denetim "her şey yolunda" der, bildirim ise sessizce hiç gitmez.
+        eposta_calisir = bool(settings.bildirim_eposta and settings.smtp_host)
+        whatsapp_calisir = bool(settings.bildirim_whatsapp and settings.whatsapp_access_token
+                                and settings.whatsapp_phone_number_id)
+        if not (eposta_calisir or whatsapp_calisir):
+            eksik = ("SMTP_HOST boş" if settings.bildirim_eposta else "alıcı adresi yok")
+            u.append(f"Bildirim gönderilemiyor ({eksik}) — bot 'yetkiliye aktarıyorum' diyor "
+                     "ama kimseye haber gitmiyor; talepler yalnızca /yonetim'de birikir.")
     return u
