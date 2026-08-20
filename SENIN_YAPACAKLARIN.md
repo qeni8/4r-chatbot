@@ -89,7 +89,7 @@ bu ayrımı net yapamıyor. **Merkez ayrı bir tesis mi, Kapaklı'nın kendisi m
 
 ## Nasıl ilerleyelim
 
-Sen bunları toplarken ben geliştirmeye devam ediyorum (`GELISTIRME_PLANI.md`).
+Sen bunları toplarken ben geliştirmeye devam ediyorum (CLAUDE.md Bölüm 5).
 Hangisi hazır olursa bana ilet — her biri bağlanması dakikalar süren işler.
 
 **Hiçbiri hazır olmasa bile bot çalışır durumda:** talepler kaydedilir, panelden

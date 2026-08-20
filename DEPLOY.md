@@ -132,7 +132,7 @@ Ayrıca **yönetim panelini** kontrol et: `https://xxxx.trycloudflare.com/yoneti
    ayağa kalksın, terminal açık kalmak zorunda olmasın.
 3. **Güç ayarları** — PC uyku moduna girmesin (Denetim Masası → Güç Seçenekleri → Uyku: Asla).
 4. **Yedek** — `data\4r_chatbot.db` tek dosya; günlük kopyası alınsın (konuşma logları burada).
-5. **İzleme** — haftada bir: `.venv\Scripts\python scripts\log_ozet.py 7`
+5. **İzleme** — haftada bir: yönetim paneli `/yonetim`
    (cevapsız kalan sorular = havuza eklenecek içerik).
 
 ## Sorun giderme

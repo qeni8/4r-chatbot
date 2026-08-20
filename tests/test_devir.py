@@ -5,7 +5,7 @@ Bu olmadan bot verdiği sözü tutmuyor: müşteri bekliyor, kimsenin haberi yok
 
 import pytest
 
-from app import bildirim, bot, devir, llm
+from app import bot, devir, llm
 from app.config import settings
 from app.db import get_conn
 
@@ -18,7 +18,7 @@ def _eszamanli_bildirim(monkeypatch):
 @pytest.fixture
 def gonderilenler(monkeypatch):
     kayit = []
-    monkeypatch.setattr(bildirim, "gonder",
+    monkeypatch.setattr(devir, "bildir",
                         lambda baslik, govde: (kayit.append((baslik, govde)), ["eposta"])[1])
     return kayit
 
@@ -101,7 +101,7 @@ def test_olmayan_devire_iletisim_eklenemez(gonderilenler):
 
 def test_bildirim_hatasi_cevabi_dusurmez(monkeypatch):
     """SMTP çökse bile müşteri cevabını almalı."""
-    monkeypatch.setattr(bildirim, "_eposta_gonder",
+    monkeypatch.setattr(devir, "_eposta_gonder",
                         lambda *a: (_ for _ in ()).throw(OSError("smtp yok")))
     monkeypatch.setattr(bot.llm, "answer",
                         lambda *a, **kw: ("kesin bilgi veremiyorum", "m"))
@@ -114,4 +114,4 @@ def test_kanal_yoksa_kayit_yine_tutulur(monkeypatch):
     monkeypatch.setattr(settings, "smtp_host", "")
     monkeypatch.setattr(settings, "bildirim_eposta", "")
     monkeypatch.setattr(settings, "bildirim_whatsapp", "")
-    assert bildirim.gonder("baslik", "govde") == []
+    assert devir.bildir("baslik", "govde") == []

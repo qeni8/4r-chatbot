@@ -1,197 +1,101 @@
-# 4R Çevre — Chatbot Projesi (Kickoff Brief)
+# 4R Çevre Chatbot — Proje Belleği
 
-> Bu dosya Claude Code oturumuna başlarken bağlam olarak verilmek üzere hazırlanmıştır.
-> İdeali: repo kök dizinine `CLAUDE.md` adıyla koymak.
+Web sitesine gömülü ve WhatsApp'tan çalışan müşteri destek botu.
+Hedef hacim ~1.000-2.000 mesaj/ay. **Öncelik kalite: bot asla uydurmaz.**
 
-## 1. Amaç
-4R Çevre ve Enerji için, hem **web sitesine gömülü** hem de **WhatsApp** üzerinden çalışan,
-müşteri sorularını yanıtlayan bir destek chatbot'u. Bot, şirketin kendi belgelerine
-(hizmetler, lisanslar, SSS) ve atık kodu veritabanına dayanarak cevap verir.
-Hedef hacim: ~1.000–2.000 mesaj/ay. Öncelik: **kalite** (uydurma yok), maliyet ikincil.
+---
 
-## 2. Mimari Karar: RAG + Yapısal Sorgu Hibriti
-- **Belgeler/SSS için RAG** (Retrieval-Augmented Generation): belgeler parçalanıp vektör
-  veritabanında tutulur; soru gelince ilgili parçalar getirilip modele "yalnızca buna
-  dayan" talimatıyla verilir. Fine-tuning YOK.
-- **Atık kodları için yapısal sorgu**: modele uğramadan, doğrudan veritabanı eşleşmesiyle
-  cevaplanır. Uydurma riskini sıfırlar. (Detay: Bölüm 5)
-- Yönlendirme: gelen mesaj atık kodu sorgusu mu (örn. "06 01 01 alıyor musunuz") yoksa
-  serbest soru mu — buna göre yapısal sorgu ya da RAG devreye girer.
+## 1. Mimari
 
-## 3. Teknik Stack
-| Katman | Seçim | Not |
-|---|---|---|
-| Backend | Python + FastAPI | Tek endpoint, iki kanal adaptörü (web + WhatsApp) |
-| Veritabanı | Postgres + pgvector (Supabase) | Vektörler + atık kodu tablosu + loglar tek yerde |
-| Embedding | Çok dilli model (Voyage / Cohere multilingual) | Türkçe kalitesi kritik; İngilizce-ağırlıklı modellerden kaçın |
-| LLM | Claude Haiku 4.5 (varsayılan) → Sonnet 4.6 (zor sorular) | Prompt caching ile sabit bağlamda ~%90 tasarruf |
-| Web | Basit JS sohbet widget'ı | Backend'e bağlanır |
-| WhatsApp | Meta WhatsApp Cloud API (doğrudan, BSP'siz) | Webhook → aynı backend |
-| Barındırma | Küçük VPS / Railway / Render | KVKK için bölge bilinçli seçilir |
+```
+Mesaj → limit → selam kısayolu → yönlendirme
+  ├─ saf atık kodu ("06 01 01 alıyor musunuz")
+  │     → SQLite tablodan kesin cevap, modele HİÇ gitmez
+  ├─ kod + başka soru ("06 01 01 fiyatı ne kadar")
+  │     → tablo sonucu modele kaynak olur, model tam soruyu cevaplar
+  └─ serbest soru
+        → tüm site içeriği (17 belge) + varsa isimle eşleşen kodlar → LLM
 
-## 4. Maliyet Beklentisi
-- Model (LLM): ~$15–25/ay (Haiku ağırlıklı, caching ile daha az).
-- WhatsApp: müşteri-başlatmalı destek "servis penceresi" içinde **ücretsiz**. Para yalnızca
-  proaktif template (kampanya/bildirim) gönderilirse başlar; Türkiye oranları çok düşük.
-- Vektör DB / embedding: bu hacimde ücretsiz katman ya da birkaç dolar.
-- **Toplam gerçekçi: ~$15–60/ay.** Geliştirme maliyeti yok (kullanıcı + Claude Code).
+Cevap gönderilmeden: içindeki atık kodları tabloya karşı doğrulanır.
+Cevaplanamazsa → devir kaydı + yetkiliye bildirim + müşteriye iletişim formu.
+```
 
-## 5. Atık Kodu Tablosu — KESİNLEŞMİŞ ŞEMA
-**Kaynak dosya:** `GU_NCEL_ATIK_KODLARI_4R.xlsx` (tek sayfa, 974 satır, 842 adet 6-haneli kod).
+**Neden vektör arama yok:** korpus 17 belge / ~5.000 kelime. Tamamı tek istekte modele
+sığıyor. Parçalama + benzerlik araması yalnızca ıskalama riski ve kurulum yükü (Docker,
+pgvector, 1 GB embedding modeli) getiriyordu. Kaldırıldı.
 
-**Tablo şeması:**
-| Alan | Tip | Açıklama |
-|---|---|---|
-| `kod` | text | Orijinal, örn. `01 03 04*` |
-| `kod_temiz` | text | Yıldızsız + boşluksuz, örn. `010304` — kelime/tam eşleşme araması için |
-| `tanim` | text | Atık tanımı |
-| `tehlikeli` | bool | Koddaki `*` işaretinden türetilir |
-| `merkez` | bool | İşaretliyse true |
-| `luleburgaz` | bool | İşaretliyse true |
-| `kapakli` | bool | İşaretliyse true |
-| `bolum` / `grup` | text | Üst başlık bağlamı (2 ve 4 haneli) |
+**Neden SQLite:** tek dosya, sunucu kurulumu yok. Windows kurulumu "Python kur → çalıştır".
 
-**İşleme kuralları:**
-- Excel'deki **AÇIKLAMA (A/M) sütununu YOK SAY** — kullanılmayacak.
-- Tesis işaretleri "x" ve "X" karışık → tek formata normalize et (büyük/küçük fark etmez = true).
-- **İşaretli = o tesiste kabul edilir. Boş = o tesiste KABUL EDİLMEZ.**
-- 6 haneli olmayan satırlar (bölüm/grup başlıkları) hiyerarşi bağlamı için ayrı tutulabilir,
-  ama "kabul/red" sorgusu yalnızca 6 haneli kodlar üzerinden çalışır.
+**LLM:** Gemini (`LLM_PROVIDER`). Ücretsiz katman yoğun günde çöktüğü için faturalandırma
+açık olmalı. Kalite yetmezse tek satırla `anthropic`.
 
-**Botun bu tablodan cevapladığı tipik soru:**
-"Şu atık kodunu alıyor musunuz, hangi tesiste?" → kodu bul → hangi tesis(ler)de true →
-tehlikeli mi → düz, kesin cevap (modele uğramadan).
+---
 
-## 6. Web Sitesi İçerik Kaynakları (ingestion listesi)
-Aşağıdaki sayfalar otomatik script'le çekilip temizlenecek ve RAG havuzuna yüklenecek.
-**Elle kopyalama değil — scriptle.**
+## 2. Pazarlık konusu olmayan kurallar
 
-**Kurumsal:** `/hakkimizda/`, `/lisanslar/`, `/kisisel-verilerin-korunmasi-aydinlatma-metni/`
-**Hizmetler (11):** `/entegre-atik-yonetimi/`, `/tehlikeli-ve-tehlikesiz-atik-ara-depolama/`,
-`/tehlikeli-ve-tehlikesiz-atik-geri-kazanim/`, `/atik-su-aritma-tesisi/`,
-`/atiktan-turetilmis-yakit-aty-uretimi/`, `/elektrikli-ve-elektronik-atik-isleme/`,
-`/akumulator-gecici-depolama/`, `/tehlikeli-atik-tasimaciligi/`, `/lisansli-vidanjor-hizmeti/`,
-`/ibc-tank-alim-satim-yikama-rebottle/`, `/solvent-geri-kazanimi-solvent-distilasyonu/`
-**Diğer:** `/hizmetlerimiz/`, `/iletisim/`, `/blog/` (yazılar), `/50-kg-alti-atik-gonderimi-kilavuzu/`
-**Mağaza/fiyat:** `/magaza/` — 50 kg altı atık için fiyatlı ürün var (bot küçük gönderimde
-fiyat söyleyebilir); 50 kg üstü "teklif al" akışına yönlendirilir.
+1. **Grounding** — model yalnızca verilen kaynaklara dayanır. Bilmiyorsa uydurmaz.
+2. **Atık kodu modele yorumlatılmaz** — kabul/red tablodan gelir. İsimle aramada birden
+   çok aday varsa bot **sorar**, model seçmez. Cevaptaki kodlar tabloya karşı doğrulanır.
+3. **Emin değilse insana devreder** — kendinden emin yanlış cevap en büyük risk.
+4. **Mevzuat/hukuki yorum yapmaz**, fiyat taahhüdü vermez (kaynaktaki mağaza fiyatı hariç).
+5. **Konu dışı soruda** kibarca reddeder, yetkiliye aktarmaz (hava durumu için insan meşgul edilmez).
+6. **Her mesaj loglanır**, KVKK saklama süresi uygulanır.
 
-## 7. Şirket Künyesi (botun temel bilgisi)
-- **Unvan:** 4R Çevre ve Enerji San. ve Tic. A.Ş. (Nadir Metal Grup şirketi)
-- **Adres:** Fatih Mah. 73. Sok. No:18, 59510 Kapaklı, Tekirdağ
-- **Tel:** +90 282 652 30 90 — **E-posta:** info@4r.com.tr
-- **Kuruluş:** 2018
-- **Tesisler / şubeler:** Kapaklı, Lüleburgaz, Merkez (bu üçü atık kodu tablosundaki
-  sütunlarla birebir örtüşür)
-- **Sosyal:** Instagram @4r_env.energy, LinkedIn, YouTube
+---
 
-## 8. Kalite & Guardrail Gereksinimleri (pazarlık konusu değil)
-- **Grounding:** Model yalnızca getirilen belgelere/tablo sonucuna dayanır. Bilgi yoksa uydurmaz.
-- **"Bilmiyorum" → insana devir:** Emin olunamayan durumda "kesin bilgi veremiyorum, sizi
-  yetkilimize aktarayım" der. Kendinden emin yanlış cevap = en büyük risk.
-- **Atık kodu & mevzuat modele yorumlatılmaz.** Kod sorgusu tablodan döner. Mevzuat/hukuki
-  yorumda bot hüküm vermez, "bağlayıcı bilgi için yetkilimize danışın" der.
-- **Kaynak gösterme:** Cevabın hangi belgeden/koddan geldiği izlenebilir olmalı.
-- **Konu sınırı:** Fiyat taahhüdü vermez (mağaza fiyatları hariç), alakasız sorulara girmez.
-- **Loglama:** Tüm sorular/cevaplar loglanır → eksikleri görüp havuzu iyileştirmek için.
+## 3. Atık kodu tablosu
 
-## 9. KVKK Notları
-- Müşteri konuşmaları kişisel veridir. Barındırma bölgesi ve saklama süresi bilinçli seçilir.
-- Geçmiş yazışmalar bota verilecekse, isim/telefon gibi kişisel bilgiler ayıklanır.
-- Sitedeki KVKK aydınlatma metniyle tutarlı bir gizlilik bildirimi botta da gösterilir.
+Kaynak: `data/raw/GUNCEL_ATIK_KODLARI_4R.xlsx` → **842 adet 6-haneli kod**
+(408 tehlikeli, 375 en az bir tesiste kabul). Yükleme sonrası bu rakamlar birebir tutmalı.
 
-## 10. Yol Haritası
-0. **Veri toplama** *(kullanıcı)* — devam ediyor (bkz. Bölüm 11).
-1. **Atık kodu tablosu** — xlsx → temiz Postgres tablosu (şema Bölüm 5).
-2. **Site ingestion** — sayfaları scriptle çek → temizle → parçala → embed → pgvector.
-3. **RAG çekirdeği + yapısal sorgu** — yönlendirme + grounding'li cevap üretimi (önce web).
-4. **Test seti** — 50–100 gerçek soru + doğru cevap; çalıştır, saçmaladığı yerleri düzelt.
-5. **Guardrail + insana devir + loglama.**
-6. **Web widget** → siteye gömme.
-7. **WhatsApp** — Meta Cloud API webhook → aynı backend.
-8. **İzle & iyileştir** *(çoğu kullanıcı)*.
+| Alan | Not |
+|---|---|
+| `kod` / `kod_temiz` | `01 03 04*` / `010304` |
+| `tehlikeli` | koddaki `*` işaretinden |
+| `merkez` / `luleburgaz` / `kapakli` | işaretli = o tesiste kabul; **boş = kabul edilmez** |
+| `bolum` / `grup` | 2 ve 4 haneli üst başlık bağlamı |
 
-> Adım 1–3 "ayağa kaldırma", 4–5 "kaliteyi garanti altına alma", 6–7 "yayın".
+Excel'deki AÇIKLAMA (A/M) sütunu yok sayılır. Kabul/red yalnızca 6 haneli kodlardan.
 
-## 11. Hâlâ Toplanacak Veriler (build sırasında paralel ilerleyebilir)
-- [ ] Lisans / sertifika **PDF'leri** (sitede link var; geçerlilik tarihleriyle toplu bir yerde).
-- [ ] **SSS** ve en sık sorulan **10–15 soru** (hem içerik hem test setinin çekirdeği).
-- [ ] Fiyat politikası netliği: hangi durumda mağaza fiyatı, hangi durumda "teklif al".
+---
 
-## 13. Alınan Kararlar (oturum notları)
-- **İsimle arama:** Müşteri kod yerine atık adı yazarsa desteklenir. Kademeli:
-  (1) tablo tanımında kelime araması, (2) ileride semantik arama (RAG embedding altyapısı
-  yeniden kullanılır). Birden çok eşleşmede bot **sorar**, koda asla model karar vermez.
-- **Grup sorgusu:** 2/4 haneli prefix sorgusu hafifçe desteklenir; 8-10'dan fazla sonuçta
-  liste dökülmez, özetlenip soru sorulur.
-- **Cevap tonu:** Kısa + yönlendirici. Önce net cevap, sonra sonraki adım. "Siz" dili,
-  jargonsuz. Tehlikeli sınıf bilgisi eklenir (taşıma/işlem ona göre değişir).
-- **Köprü:** "Alıyoruz" sonrası müşteri "nasıl gönderirim / fiyat" sorar →
-  50 kg altı mağaza fiyatı, 50 kg üstü "teklif al". Site içeriğine bağlı (Adım 2).
+## 4. Şirket künyesi
 
-## 15. Mimari Sadeleştirme (güncel — önceki kararların yerini alır)
-Korpusun küçüklüğü (17 belge / ~5.000 kelime) ölçüldükten sonra vektör yığını kaldırıldı:
-- **RAG → tam bağlam.** Site içeriğinin tamamı her istekte modele verilir (`app/knowledge.py`).
-  Parçalama, embedding ve benzerlik araması yok → retrieval ıskalaması diye bir hata sınıfı yok.
-- **Postgres+pgvector → SQLite.** Tek dosya, sunucu kurulumu yok. Docker/WSL2/BIOS zinciri
-  kalktı; Windows kurulumu "Python kur + pip install + çalıştır"a indi.
-- **Silinenler:** `embeddings.py`, `retrieval.py`, `chunk_site.py`, `embed_*.py`,
-  `docker-compose.yml`, `fastembed`/`psycopg`/`pgvector` bağımlılıkları.
-- **LLM:** Gemini (faturalandırma açık — ücretsiz katman yoğun günde çöküyor, Groq'ta yaşandı).
-  `LLM_PROVIDER=anthropic` ile tek satır geçiş korunur.
-- **Düzeltilen gerçek hatalar:** (1) tarih `01.05.2024` sahte atık koduna dönüyordu;
-  (2) "kod + fiyat/süreç" sorusunda sorunun geri kalanı yutuluyordu; (3) her LLM hatası
-  sessizce "yoğunluk" mesajına çevrilip testte muaf tutuluyordu — kalite hiç ölçülmemişti;
-  (4) prod'da boş `WHATSAPP_APP_SECRET` webhook'u herkese açık bırakıyordu.
-- **Bekleyen veriler:** `EKSIKLER.md` (mağaza fiyatları, lisanslar, SSS, "Merkez" tesisi).
-- **Sağlamlaştırma (sonraki tur):** (1) cevap gönderilmeden önce içindeki atık kodları
-  tabloya karşı doğrulanır — uydurma kod kullanıcıya ulaşmaz; (2) KVKK saklama süresi
-  (`LOG_SAKLAMA_GUN=180`) açılışta uygulanır; (3) `oturum_id` taklit edilebildiği için
-  IP bazlı günlük limit eklendi (ham IP saklanmaz, hash'lenir); (4) yanlış yapılandırma
-  açılışta loglanır ve `/health` içinde görünür; (5) widget'ta zaman aşımı + HTTP hata
-  kontrolü (arayüz süresiz kilitli kalmıyor).
-- **Kalite ölçümü:** 40 soru → 33 PASS / 7 REVIEW / 0 FAIL / 0 HATA. 84 hermetik pytest.
+**4R Çevre ve Enerji San. ve Tic. A.Ş.** (Nadir Metal Grup) · Kuruluş 2018
+Fatih Mah. 73. Sok. No:18, 59510 Kapaklı, Tekirdağ
++90 282 652 30 90 · info@4r.com.tr
+Tesisler: Kapaklı · Lüleburgaz · Merkez *(bkz. açık soru: "Merkez" neresi?)*
+Canonical istatistik: **+5900 firma · 92.000 ton/yıl** (anasayfa doğru; hakkımızda'daki
+eski 2.500/85.000 düzeltildi).
 
-## 14. İlerleme
-- [x] **Adım 1 — Atık kodu tablosu** tamam: 842 kod Postgres'e yüklendi, yapısal sorgu
-  test edildi (format toleransı, tehlikeli/tesis bilgisi, olmayan kodda "yetkiliye devir").
-- [x] **Adım 2 — Site ingestion** tamam: 18 sayfa çekildi+temizlendi → 43 parça (başlık dahil)
-  → ücretsiz yerel embedding → **hibrit arama** (anlamsal + Türkçe FTS, RRF). Test edildi, kaliteli.
-- **Canonical istatistik (Bölüm 12 çözüldü):** +5900 firma · 92.000 ton/yıl (anasayfa doğru).
-  Hakkımızda'daki eski 2.500/85.000 düzeltildi.
-- **Embedding kararı (güncellendi):** ücretsiz yerel model
-  `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`, **768 boyut**. Voyage iptal.
-  (e5-large denendi → fastembed/onnxruntime harici-veri hatası; mpnet'e geçildi.)
-- **Retrieval kararı:** tek başına anlamsal arama Türkçe'de zayıf kaldı → hibrit (vektör + `to_tsvector('turkish')`)
-  RRF ile birleştirildi. Varsayılan k=5.
-- **LLM kararı (güncel):** **Groq + Llama 3.3 70B — tamamen ücretsiz.** Sağlayıcı-bağımsız
-  (`LLM_PROVIDER`: groq | gemini | anthropic). Groq ücretsiz katman bu hacme fazlasıyla yeter;
-  gerekirse ücretli Gemini/Anthropic'e tek satır geçiş. Maliyet: LLM $0 + embedding $0.
-- **Barındırma kararı:** küçük VPS (~$5/ay, TR/EU) — güvenilirlik için. En son kurulacak.
-- [x] **Adım 4 — Test seti**: 40 soru + otomatik değerlendirici. Temiz run: 30 PASS, 0 gerçek FAIL.
-- **Groq limit bulgusu + çözüm:** ücretsiz 70B = 100k token/gün. Tavanda otomatik
-  `llama-3.1-8b-instant`'a düşer (yine ücretsiz) → bot hiç düşmez. Retry TPM'de, fallback TPD'de.
-- [x] **İsimle atık arama 2. faz (semantik):** atik_kodlari.embedding + hibrit name_context.
-  "boya çamuru" → doğru boya kodları; yazım hatasına dayanıklı.
-- [x] **KVKK gizlilik notu** widget'ta. [x] **Tazeleme scripti** (scripts/refresh.py).
-- **Kalan (senden veri):** mağaza fiyatları (JS/manuel liste), test setini gerçek SSS ile büyütme.
-- **Kalan yayın işleri:** VPS + widget script + Meta WhatsApp kurulumu + domain/HTTPS + refresh cron.
-- [x] **Adım 3 — Bot beyni** çalışıyor: yönlendirici (`router.py`) + yapısal cevap (`waste_lookup.py`) +
-  hibrit RAG (`retrieval.py`) + model cevabı (`llm.py`, Gemini/Anthropic) + `/chat` orkestrasyon + loglama.
-  Canlı test: grounding doğru (5900 firma, solvent listesi, adres), bilmediğinde uydurmadan yetkiliye devir,
-  fiyat taahhüdü yok. Gemini ücretsiz katman 429'a karşı retry + güvenli fallback eklendi.
-- [x] **Anti-spam / maliyet koruması** (`limits.py`): günlük 200 (tüm bot) + oturum 25/gün +
-  ani 5/60sn. Sınır aşımı modele gitmeden nazik mesajla durur. Test edildi.
-- **Maliyet tavanı:** Google tarafında $10/ay bütçe uyarısı (kurulacak). Asıl sert tavan
-  uygulama içi günlük 200 limit (maks ~$5/ay senaryosu).
-- [x] **Adım 6 — Web widget**: `web/widget.js` (gömülebilir), `/widget.js` + `/demo`, CORS. Tarayıcıda canlı test edildi.
-- [x] **Adım 7 — WhatsApp**: `whatsapp.py` + webhook (verify/POST), ortak `bot.py`. Lokal test edildi.
-  Canlı için Meta token + genel webhook URL (yayın) gerekir.
-- **Barındırma:** şu an lokal (dev). Yayın için küçük VPS (TR/EU), ~$5-10/ay — EN SON.
-- **Yayın öncesi açık iş:** test seti (Adım 4), isimle atık arama (Bölüm 13).
-- **Yayın (en son):** VPS deploy + widget script URL + Meta WhatsApp kurulumu + Google ücretli plan & $10 tavan.
+---
 
-## 12. Çözülecek Tutarsızlık (önemli not)
-Sitede iki farklı istatistik var: anasayfa "+5900 firma / 92.000 ton" derken, hakkımızda
-sayfası "2.500+ tesis / 85.000 ton/yıl" diyor. **Çelişen bilgi = botun çelişmesi.**
-Hangisi güncel/doğruysa o sabitlenmeli, diğeri havuzdan çıkarılmalı.
+## 5. Durum
+
+**Tamam:** atık kodu tablosu · site içeriği · bot çekirdeği · guardrail'ler · web widget ·
+WhatsApp adaptörü · limitler (günlük/oturum/IP) · KVKK saklama · devir kaydı + bildirim +
+müşteri iletişim toplama · yönetim paneli (`/yonetim`).
+
+**Ölçüm:** 40 soruluk kalite seti → 33 PASS / 7 REVIEW / 0 FAIL / 0 HATA.
+112 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
+
+**Kalan (kod):** Windows servisi + kalıcı tünel + yedekleme (yayın günü) · otomatik test (CI) ·
+test setini gerçek SSS ile büyütme.
+
+**Kalan (kullanıcıdan):** `SENIN_YAPACAKLARIN.md` — GitHub push onayı, Windows kurulumu,
+Gemini faturalandırma, SMTP/WhatsApp bildirim bilgileri, panel şifresi, mağaza fiyatları,
+lisans bilgileri, SSS, "Merkez" tesisi belirsizliği.
+
+---
+
+## 6. Çözülmüş tuzaklar (tekrar açmayın)
+
+- Tarih `01.05.2024` içindeki `05.2024` atık kodu sanılıyordu → tarih/telefon maskeleniyor.
+- "kod + fiyat" sorusunda sorunun geri kalanı yutuluyordu → tablo sonucu modele kaynak olur.
+- Her LLM hatası sessizce "yoğunluk" mesajına çevriliyordu → kalite hiç ölçülememişti.
+  Artık `LLMRateLimit` / `LLMError` ayrı, traceback loglanır, test HATA'yı gizlemez.
+- Gemini 2.5 Flash düşünme tokenları çıktı bütçesini yiyip cevabı kesiyordu →
+  `thinkingBudget=0`.
+- Gemini geçici 503 ("high demand") döndüğünde bot düşüyordu → üstel beklemeyle 3 deneme.
+- Prod'da boş `WHATSAPP_APP_SECRET` webhook'u herkese açık bırakıyordu.
+- `oturum_id` tarayıcıda üretiliyor, taklit edilebilir → IP bazlı limit eklendi.

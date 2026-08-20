@@ -2,7 +2,7 @@
 
 Atık yönetimi destek botu (web widget + WhatsApp). Uydurmaz; bilmediğinde insana devreder.
 Mimari kararlar: [`CLAUDE.md`](./CLAUDE.md) · Yayın: [`DEPLOY.md`](./DEPLOY.md) ·
-Bekleyen veriler: [`EKSIKLER.md`](./EKSIKLER.md)
+Senden bekleyenler: [`SENIN_YAPACAKLARIN.md`](./SENIN_YAPACAKLARIN.md)
 
 **Bağımlılık yok denecek kadar az:** Python + SQLite. Docker, Postgres, vektör veritabanı
 ve embedding modeli **kullanılmaz** — korpus küçük olduğu için tamamı doğrudan modele verilir.
@@ -58,10 +58,10 @@ Her mesaj loglanır.
 
 | Yol | İçerik |
 |---|---|
-| `app/` | `main.py` (API) · `bot.py` (orkestrasyon) · `router.py` · `waste_lookup.py` · `knowledge.py` · `llm.py` · `limits.py` · `whatsapp.py` · `db.py` · `config.py` · `sabitler.py` |
-| `scripts/` | `ingest_atik_kodlari.py` · `fetch_site.py` · `refresh.py` · `run_tests.py` · `log_ozet.py` |
+| `app/` | `main.py` (API) · `bot.py` (orkestrasyon) · `router.py` · `waste_lookup.py` · `knowledge.py` · `llm.py` · `devir.py` · `limits.py` · `yonetim.py` · `whatsapp.py` · `db.py` · `config.py` · `sabitler.py` |
+| `scripts/` | `ingest_atik_kodlari.py` · `fetch_site.py` · `refresh.py` · `run_tests.py` |
 | `data/site/` | Site içeriği (bot bilgisinin kaynağı, düz Markdown) |
-| `db/schema.sql` | SQLite şeması: `atik_kodlari` + `konusma_loglari` |
+| `db/schema.sql` | SQLite şeması: `atik_kodlari` · `konusma_loglari` · `devir_kayitlari` |
 | `web/` | `widget.js` (gömülebilir) · `demo.html` |
 
 ## Yönetim paneli
@@ -77,7 +77,6 @@ Talep "Tamam" ile okundu işaretlenir.
 ```bash
 pytest -q                       # hermetik regresyon (DB/model gerektirmez)
 python scripts/run_tests.py     # 40 soruluk kalite seti — HATA sayısı 0 olmalı
-python scripts/log_ozet.py 7    # son 7 gün: hacim, devir oranı, cevapsız sorular
 python scripts/refresh.py       # site içeriği değiştiğinde tazele
 ```
 
