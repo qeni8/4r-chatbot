@@ -48,7 +48,17 @@
     "#r4-send{border:none;background:" + RENK + ";color:#fff;padding:0 18px;cursor:pointer;font-size:15px}" +
     ".r4-typing{color:#7a7f87;font-style:italic}" +
     ".r4-foot{font-size:11px;color:#8a8f97;text-align:center;padding:6px 10px;border-top:1px solid #eef0f2}" +
-    ".r4-foot a{color:#6a6f77}";
+    ".r4-foot a{color:#6a6f77}" +
+    ".r4-devir{background:#fff;border:1px solid " + RENK + ";border-radius:12px;padding:12px;margin:6px 0;max-width:100%}" +
+    ".r4-devir p{margin:0 0 8px;font-size:13px;color:#1a1a1a}" +
+    ".r4-devir input,.r4-devir textarea{width:100%;box-sizing:border-box;border:1px solid #dfe2e6;" +
+    "border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:6px;font-family:inherit}" +
+    ".r4-devir textarea{resize:vertical;min-height:44px}" +
+    ".r4-devir button{width:100%;border:none;background:" + RENK + ";color:#fff;padding:9px;" +
+    "border-radius:8px;cursor:pointer;font-size:14px}" +
+    ".r4-devir button[disabled]{opacity:.55;cursor:default}" +
+    ".r4-kvkk{font-size:11px;color:#8a8f97;margin:6px 0 0;line-height:1.4}" +
+    ".r4-hata{color:#b3261e;font-size:12px;margin:4px 0 0}";
 
   var st = document.createElement("style");
   st.textContent = css;
@@ -85,6 +95,61 @@
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
     return d;
+  }
+
+  // Bot cevaplayamayıp yetkiliye devrettiğinde: müşteri iletişim bırakabilsin.
+  // Bu form olmadan talep kayboluyordu (bot "aktarayım" diyor ama kimse dönmüyordu).
+  function devirFormu(devirId) {
+    var kutu = document.createElement("div");
+    kutu.className = "r4-m r4-devir";
+    kutu.innerHTML =
+      "<p>İsterseniz iletişim bilgilerinizi bırakın, yetkilimiz size dönsün.</p>" +
+      '<input class="r4-ad" placeholder="Adınız Soyadınız" autocomplete="name">' +
+      '<input class="r4-tel" placeholder="Telefon" autocomplete="tel" inputmode="tel">' +
+      '<textarea class="r4-not" placeholder="Eklemek istediğiniz not (isteğe bağlı)"></textarea>' +
+      "<button type=\"button\">Beni arayın</button>" +
+      '<p class="r4-kvkk">Bilgileriniz yalnızca size dönüş yapmak için kullanılır ve ' +
+      '180 gün sonra silinir. <a href="' + KVKK_URL + '" target="_blank" rel="noopener">Aydınlatma metni</a></p>';
+    msgs.appendChild(kutu);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    var bAd = kutu.querySelector(".r4-ad");
+    var bTel = kutu.querySelector(".r4-tel");
+    var bNot = kutu.querySelector(".r4-not");
+    var bGonder = kutu.querySelector("button");
+
+    bGonder.onclick = function () {
+      var ad = bAd.value.trim(), tel = bTel.value.trim();
+      var eskiHata = kutu.querySelector(".r4-hata");
+      if (eskiHata) eskiHata.parentNode.removeChild(eskiHata);
+      if (!ad || !tel) {
+        var h = document.createElement("p");
+        h.className = "r4-hata";
+        h.textContent = "Lütfen adınızı ve telefonunuzu yazın.";
+        kutu.appendChild(h);
+        return;
+      }
+      bGonder.disabled = true;
+      bGonder.textContent = "Gönderiliyor...";
+      fetch(API.replace(/\/$/, "") + "/iletisim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ devir_id: devirId, ad: ad, telefon: tel, not: bNot.value.trim() })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.ok) throw new Error("red");
+          kutu.innerHTML = "<p>" + esc(d.mesaj) + "</p>";
+        })
+        .catch(function () {
+          bGonder.disabled = false;
+          bGonder.textContent = "Beni arayın";
+          var h2 = document.createElement("p");
+          h2.className = "r4-hata";
+          h2.textContent = "Gönderilemedi. Lütfen bizi arayın: +90 282 652 30 90";
+          kutu.appendChild(h2);
+        });
+    };
   }
 
   btn.onclick = function () {
@@ -135,6 +200,7 @@
         if (data.sources && data.sources.length) {
           ekle("Kaynak: " + esc(data.sources.slice(0, 3).join(", ")), "r4-src");
         }
+        if (data.devir_id) devirFormu(data.devir_id);
       })
       .catch(function () {
         bekle.innerHTML = esc(

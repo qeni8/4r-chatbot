@@ -35,16 +35,22 @@ def init_db() -> None:
 
 
 def eski_loglari_temizle() -> int:
-    """KVKK saklama süresini uygular; silinen kayıt sayısını döndürür."""
+    """KVKK saklama süresini uygular; silinen kayıt sayısını döndürür.
+
+    Devir kayıtları da temizlenir — içlerinde müşteri adı ve telefonu var.
+    """
     if settings.log_saklama_gun <= 0:
         return 0
+    esik = (f"-{settings.log_saklama_gun} days",)
+    silinen = 0
     with get_conn() as conn:
-        cur = conn.execute(
-            "delete from konusma_loglari where created_at < datetime('now', ?)",
-            (f"-{settings.log_saklama_gun} days",),
-        )
+        for tablo in ("konusma_loglari", "devir_kayitlari"):
+            cur = conn.execute(
+                f"delete from {tablo} where created_at < datetime('now', ?)", esik
+            )
+            silinen += cur.rowcount
         conn.commit()
-        return cur.rowcount
+    return silinen
 
 
 @contextmanager

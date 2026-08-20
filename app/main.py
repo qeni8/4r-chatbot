@@ -7,9 +7,9 @@ from pathlib import Path
 from fastapi import BackgroundTasks, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from app import bot, knowledge, whatsapp
+from app import bot, devir, knowledge, whatsapp
 from app.config import settings, yapilandirma_uyarilari
 from app.db import eski_loglari_temizle, get_conn, init_db
 
@@ -80,6 +80,17 @@ class ChatResponse(BaseModel):
     answer: str
     method: str
     sources: list[str] = []
+    devir_id: int | None = None   # doluysa widget "size dönelim mi?" formunu gösterir
+
+
+class IletisimRequest(BaseModel):
+    devir_id: int
+    ad: str
+    telefon: str
+    eposta: str = ""
+    not_: str = Field("", alias="not")
+
+    model_config = {"populate_by_name": True}
 
 
 def istemci_kimligi(request: Request) -> str | None:
@@ -99,7 +110,21 @@ def istemci_kimligi(request: Request) -> str | None:
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest, request: Request) -> ChatResponse:
     r = bot.reply(req.message, req.session_id, req.channel, istemci_kimligi(request))
-    return ChatResponse(answer=r["answer"], method=r["method"], sources=r["sources"])
+    return ChatResponse(answer=r["answer"], method=r["method"], sources=r["sources"],
+                        devir_id=r.get("devir_id"))
+
+
+@app.post("/iletisim")
+def iletisim(req: IletisimRequest) -> dict:
+    """Müşteri geri dönüş isterse iletişim bilgisini kaydeder ve yetkiliye bildirir."""
+    ad, telefon = req.ad.strip()[:80], req.telefon.strip()[:32]
+    if not ad or not telefon:
+        return {"ok": False, "mesaj": "Ad ve telefon gerekli."}
+    ok = devir.iletisim_ekle(req.devir_id, ad, telefon,
+                             req.eposta.strip()[:120], req.not_.strip()[:500])
+    if not ok:
+        return {"ok": False, "mesaj": "Talep bulunamadı."}
+    return {"ok": True, "mesaj": "Teşekkürler, en kısa sürede size döneceğiz."}
 
 
 def _handle_wa(phone: str, text: str) -> None:

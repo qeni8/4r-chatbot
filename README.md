@@ -34,7 +34,9 @@ Mesaj → limit kontrolü → selam kısayolu → yönlendirme
         → tüm site içeriği (17 belge) + varsa isimle eşleşen kodlar → LLM
 
 Cevap gönderilmeden önce: içindeki atık kodları tabloya karşı doğrulanır.
-Bilmiyorsa / konu dışıysa / hata → insana devir. Her mesaj loglanır.
+Bilmiyorsa / konu dışıysa / hata → devir kaydı açılır + yetkiliye bildirim gider
+                                  + müşteriye "size dönelim mi?" formu gösterilir.
+Her mesaj loglanır.
 ```
 
 - **Neden vektör arama yok:** korpus 17 belge / ~5.000 kelime. Tamamı tek istekte modele
@@ -45,6 +47,10 @@ Bilmiyorsa / konu dışıysa / hata → insana devir. Her mesaj loglanır.
   göndermek en pahalı hata olduğu için son savunma hattı.
 - **Koruma katmanları:** günlük/oturum/IP limitleri (`app/limits.py`), KVKK saklama süresi
   (`LOG_SAKLAMA_GUN`), yapılandırma denetimi (`/health` → `uyarilar`).
+- **Devir takibi:** bot cevaplayamadığında talep `devir_kayitlari`'na yazılır ve
+  `BILDIRIM_EPOSTA` / `BILDIRIM_WHATSAPP` kanallarına bildirilir (`app/devir.py`).
+  Widget müşteriye iletişim formu gösterir → `POST /iletisim`. Kanal ayarlı değilse
+  kayıt yine tutulur ve `/health` uyarı verir.
 - **LLM:** Gemini (`LLM_PROVIDER=gemini`). Kaliteden memnun kalınmazsa tek satırla Anthropic'e
   geçiş: `LLM_PROVIDER=anthropic` + `pip install -e ".[anthropic]"`.
 

@@ -43,11 +43,12 @@ def _test_db(tmp_path_factory):
 
 
 @pytest.fixture(autouse=True)
-def _temiz_loglar():
-    """Her test kendi log durumundan başlasın (limit sayaçları birbirine karışmasın)."""
+def _temiz_kayitlar():
+    """Her test kendi durumundan başlasın (limit sayaçları ve devirler karışmasın)."""
     yield
     with get_conn() as conn:
         conn.execute("delete from konusma_loglari")
+        conn.execute("delete from devir_kayitlari")
         conn.commit()
 
 

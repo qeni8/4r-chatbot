@@ -14,6 +14,7 @@ def _saglikli_varsayilan(monkeypatch):
     monkeypatch.setattr(settings, "whatsapp_app_secret", "gizli")
     monkeypatch.setattr(settings, "whatsapp_access_token", "token")
     monkeypatch.setattr(settings, "log_saklama_gun", 180)
+    monkeypatch.setattr(settings, "bildirim_eposta", "info@4r.com.tr")
 
 
 def test_saglikli_yapilandirma_uyari_vermez():
@@ -44,6 +45,13 @@ def test_whatsapp_secret_eksikligi_yakalanir(monkeypatch):
 def test_saklama_kapaliysa_kvkk_uyarisi(monkeypatch):
     monkeypatch.setattr(settings, "log_saklama_gun", 0)
     assert any("LOG_SAKLAMA_GUN" in u for u in yapilandirma_uyarilari())
+
+
+def test_bildirim_kanali_yoksa_uyarir(monkeypatch):
+    """Botun 'yetkiliye aktarıyorum' sözü boşta kalıyorsa bu sessiz kalmamalı."""
+    monkeypatch.setattr(settings, "bildirim_eposta", "")
+    monkeypatch.setattr(settings, "bildirim_whatsapp", "")
+    assert any("Bildirim kanalı yok" in u for u in yapilandirma_uyarilari())
 
 
 def test_tanimsiz_saglayici_yakalanir(monkeypatch):

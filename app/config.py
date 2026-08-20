@@ -26,6 +26,19 @@ class Settings(BaseSettings):
     whatsapp_phone_number_id: str = ""
     whatsapp_app_secret: str = ""  # gelen webhook imza (X-Hub-Signature-256) doğrulaması
 
+    # --- Devir bildirimi ---
+    # Bot cevaplayamayıp yetkiliye devrettiğinde talep buralara bildirilir.
+    # Hiçbiri ayarlı değilse kayıt yine tutulur (yönetim panelinden görülür).
+    bildirim_eposta: str = ""      # alıcı adres(ler), virgülle
+    bildirim_whatsapp: str = ""    # yetkili telefonu, ör. 905321112233
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_tls: bool = True
+    smtp_from: str = ""            # boşsa smtp_user kullanılır
+    bildirim_arkaplan: bool = True  # testlerde False → eşzamanlı
+
     app_env: str = "dev"
     log_level: str = "info"
     # KVKK: konuşma logları kişisel veridir, süresiz saklanamaz. Açılışta bu yaştan
@@ -72,4 +85,7 @@ def yapilandirma_uyarilari() -> list[str]:
             u.append("WHATSAPP_APP_SECRET boş — gelen webhook istekleri reddedilecek.")
         if settings.log_saklama_gun <= 0:
             u.append("LOG_SAKLAMA_GUN=0 — konuşma logları süresiz saklanır (KVKK riski).")
+        if not (settings.bildirim_eposta or settings.bildirim_whatsapp):
+            u.append("Bildirim kanalı yok — bot 'yetkiliye aktarıyorum' diyor ama kimseye "
+                     "haber gitmiyor. BILDIRIM_EPOSTA veya BILDIRIM_WHATSAPP ayarlayın.")
     return u

@@ -31,3 +31,24 @@ create table if not exists konusma_loglari (
 );
 create index if not exists idx_loglar_created on konusma_loglari (created_at);
 create index if not exists idx_loglar_oturum on konusma_loglari (oturum_id, created_at);
+
+-- Bot "sizi yetkilimize aktarayım" dediğinde talep burada kaydedilir ve bildirilir.
+-- Kayıt olmazsa müşteri bekler, kimsenin haberi olmaz (ürünün sözünü tutmaması).
+create table if not exists devir_kayitlari (
+    id          integer primary key autoincrement,
+    oturum_id   text,
+    kanal       text,
+    sebep       text,                        -- bilgi_yok | kod_yok | kabul_edilmiyor | hata | limit
+    soru        text not null,
+    cevap       text,
+    gecmis      text,                        -- JSON: o ana kadarki konuşma
+    ad          text,                        -- müşteri iletişim bıraktıysa (KVKK: açık rıza)
+    telefon     text,
+    eposta      text,
+    musteri_not text,
+    durum       text not null default 'yeni',-- yeni | okundu
+    bildirim    text,                        -- hangi kanallara gitti
+    created_at  text not null default (datetime('now'))
+);
+create index if not exists idx_devir_created on devir_kayitlari (created_at);
+create index if not exists idx_devir_durum on devir_kayitlari (durum, created_at);

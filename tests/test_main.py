@@ -90,6 +90,24 @@ def test_webhook_gecerli_imza_kabul(client, monkeypatch):
     assert r.status_code == 200
 
 
+def test_iletisim_kaydeder(client, monkeypatch):
+    monkeypatch.setattr(settings, "bildirim_arkaplan", False)
+    monkeypatch.setattr(bot.llm, "answer",
+                        lambda *a, **kw: ("kesin bilgi veremiyorum", "m"))
+    devir_id = client.post("/chat", json={"message": "lisans tarihi",
+                                          "session_id": "api-dv"}).json()["devir_id"]
+    assert devir_id is not None
+
+    r = client.post("/iletisim", json={"devir_id": devir_id, "ad": "Ali Veli",
+                                       "telefon": "05001112233", "not": "acil"})
+    assert r.json()["ok"] is True
+
+
+def test_iletisim_eksik_alan_reddedilir(client):
+    r = client.post("/iletisim", json={"devir_id": 1, "ad": "", "telefon": ""})
+    assert r.json()["ok"] is False
+
+
 def test_widget_ve_demo_servis_edilir(client):
     assert client.get("/widget.js").status_code == 200
     assert "4R" in client.get("/demo").text
