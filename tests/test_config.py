@@ -1,8 +1,10 @@
 """Yayında sessizce bozuk çalışmaya yol açan yapılandırmalar erkenden yakalanmalı."""
 
+from pathlib import Path
+
 import pytest
 
-from app.config import settings, yapilandirma_uyarilari
+from app.config import Settings, settings, yapilandirma_uyarilari
 
 
 @pytest.fixture(autouse=True)
@@ -72,3 +74,14 @@ def test_smtp_yoksa_calisir_whatsapp_yeter(monkeypatch):
     monkeypatch.setattr(settings, "bildirim_whatsapp", "905321112233")
     monkeypatch.setattr(settings, "whatsapp_phone_number_id", "1")
     assert yapilandirma_uyarilari() == []
+
+
+def test_ornek_env_dosyasi_temiz_okunuyor():
+    """`.env.example` satır sonu yorumları değer olarak okunmamalı.
+
+    `SMTP_HOST=   # ör. mail.4r.com.tr` gibi bir satırda yorum değere sızıyordu:
+    ayar dolu görünüyor, denetim 'kanal var' diyor, bildirim ise hiç gitmiyordu.
+    """
+    ornek = Settings(_env_file=Path(__file__).resolve().parent.parent / ".env.example")
+    bozuk = {k: v for k, v in ornek.model_dump().items() if isinstance(v, str) and "#" in v}
+    assert bozuk == {}

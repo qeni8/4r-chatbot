@@ -83,7 +83,7 @@ müşteri iletişim toplama · yönetim paneli (`/yonetim`) · Windows kalıcı 
 (`scripts/windows_kur.ps1`: açılışta başlat, çökerse kaldır, saat başı sağlık + yedek).
 
 **Ölçüm:** 40 soruluk kalite seti → 33 PASS / 7 REVIEW / 0 FAIL / 0 HATA.
-122 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
+123 hermetik pytest. `scripts/run_tests.py` HATA sayısı 0 değilse ölçüm geçersizdir.
 
 **Kalan (kod):** otomatik test (CI) · test setini gerçek SSS ile büyütme.
 
@@ -103,4 +103,7 @@ lisans bilgileri, SSS, "Merkez" tesisi belirsizliği.
   `thinkingBudget=0`.
 - Gemini geçici 503 ("high demand") döndüğünde bot düşüyordu → üstel beklemeyle 3 deneme.
 - Prod'da boş `WHATSAPP_APP_SECRET` webhook'u herkese açık bırakıyordu.
+- `.env.example`'da `SMTP_HOST=   # ör. mail...` gibi satır sonu yorumu **değer olarak**
+  okunuyordu: ayar dolu görünüyor, denetim "kanal var" diyor, posta hiç gitmiyordu.
+  Boş değerin yanına yorum yazılmaz; `tests/test_config.py` bunu bekçiliyor.
 - `oturum_id` tarayıcıda üretiliyor, taklit edilebilir → IP bazlı limit eklendi.
